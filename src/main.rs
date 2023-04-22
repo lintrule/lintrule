@@ -1,3 +1,4 @@
+use colored::*;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +8,16 @@ struct DocumentRule {
     rule: String,
 }
 
-async fn send_rule(url: &str, document_rule: DocumentRule) -> Result<String, reqwest::Error> {
+#[derive(Serialize, Deserialize)]
+struct DocumentRuleResponse {
+    pass: bool,
+    message: String,
+}
+
+async fn send_rule(
+    url: &str,
+    document_rule: DocumentRule,
+) -> Result<DocumentRuleResponse, reqwest::Error> {
     // Create a client to make HTTP requests
     let client = Client::new();
 
@@ -19,13 +29,16 @@ async fn send_rule(url: &str, document_rule: DocumentRule) -> Result<String, req
     // Read the response body into a string
     let body = res.text().await?;
 
+    // Parse the response body into a DocumentRuleResponse struct
+    let body: DocumentRuleResponse = serde_json::from_str(&body).unwrap();
+
     Ok(body)
 }
-// A simple binary file
+
 #[tokio::main]
 async fn main() {
     // Read a file
-    let document = std::fs::read_to_string("src/main.rs").unwrap();
+    let document = std::fs::read_to_string("code.js").unwrap();
 
     // Read the rule
     let rule = std::fs::read_to_string("rules/dummy.md").unwrap();
@@ -37,5 +50,14 @@ async fn main() {
     .await
     .unwrap();
 
-    println!("{}", body);
+    if !body.pass {
+        // Print the error message
+        eprintln!("{}", body.message.red());
+
+        // Exit with a non-zero exit code
+        std::process::exit(1);
+    }
+
+    // Print the success message
+    eprintln!("{}", body.message);
 }

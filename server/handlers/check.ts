@@ -30,19 +30,20 @@ export const handleCheck = async (req: Request): Promise<Response> => {
       },
       {
         role: "system",
-        content: "You must respond with one word: 'pass' or 'fail'",
+        content:
+          "If the document passes the rule, type 'pass'. Otherwise, explain what's wrong using markdown",
       },
     ],
   });
 
   const result = completion.data.choices[0].message?.content;
-  console.log("result", rule, result);
 
   if (!result) throw new Error("No result from OpenAI");
 
   return new Response(
     JSON.stringify({
       pass: result.toLowerCase() === "pass",
+      message: result,
     }),
     {
       status: 200,
