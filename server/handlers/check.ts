@@ -10,6 +10,15 @@ export interface ResponseBody {
   pass: boolean;
 }
 
+type ResponseType =
+  | {
+      pass: true;
+    }
+  | {
+      pass: false;
+      message: string;
+    };
+
 export const handleCheck = async (req: Request): Promise<Response> => {
   const { document, rule } = (await req.json()) as RequestBody;
 
@@ -30,26 +39,29 @@ export const handleCheck = async (req: Request): Promise<Response> => {
       },
       {
         role: "system",
-        content:
-          "If the document passes the rule, type the word 'pass'. Otherwise, explain what's wrong using markdown",
+        content: `Respond in json this type.
+type Response = {
+  pass: true;
+} | {
+  pass: false;
+  message: string;
+}
+        `,
       },
     ],
   });
 
   const result = completion.data.choices[0].message?.content;
+  console.log("result", result);
 
   if (!result) throw new Error("No result from OpenAI");
 
-  return new Response(
-    JSON.stringify({
-      pass: result.toLowerCase() === "pass",
-      message: result,
-    }),
-    {
-      status: 200,
-      headers: {
-        "content-type": "application/json",
-      },
-    }
-  );
+  const r = JSON.parse(result) as ResponseType;
+
+  return new Response(JSON.stringify(r), {
+    status: 200,
+    headers: {
+      "content-type": "application/json",
+    },
+  });
 };

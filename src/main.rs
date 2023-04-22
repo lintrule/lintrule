@@ -13,7 +13,7 @@ struct DocumentRule {
 #[derive(Serialize, Deserialize)]
 struct DocumentRuleResponse {
     pass: bool,
-    message: String,
+    message: Option<String>,
 }
 
 async fn send_rule(
@@ -129,20 +129,26 @@ async fn main() {
                     if !resp.pass {
                         // Print the error message
                         eprintln!(
-                            "🚨 {} - {}",
-                            path.to_str().unwrap().red(),
-                            resp.message.red()
+                            "{} {} - {}",
+                            " FAIL ".bright_white().on_red(),
+                            path.to_str().unwrap(),
+                            resp.message.unwrap().red()
                         );
 
                         // Exit with a non-zero exit code
                         std::process::exit(1);
                     } else {
-                        println!("✅ {}", path.to_str().unwrap().green());
+                        println!(
+                            "{} {} {}",
+                            " PASS ".bright_white().on_green(),
+                            path.to_str().unwrap(),
+                            rule_path.to_str().unwrap().dimmed(),
+                        );
                     }
                 }
             }
         }
     }
 
-    eprintln!("{}", "All checks passed!".green());
+    eprintln!("{}", " All checks passed! ".bright_white().on_green());
 }

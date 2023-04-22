@@ -26,14 +26,14 @@ Next, let's create a new rule. For example, let's create a rule that checks that
 any obvious vulnerabilities.
 
 ```bash
-$ rules add vulnerabilities
+$ rules add no-xss
 ```
 
-This will create a file called `vulernabilities.txt` in the `rules` folder. Open it up, and
+This will create a file called `no-xss.txt` in the `rules` folder. Open it up, and
 let's put something like this in it:
 
 ```markdown
-Fail if there's obvious vulnerabilities in the code.
+Fail if there's obvious xss vulnerabilities in the code.
 ```
 
 Now, we can run all the rules.
