@@ -35,8 +35,10 @@ async fn send_rule(
     Ok(body)
 }
 
-#[tokio::main]
-async fn main() {
+async fn check(
+    document_path: &str,
+    rule_path: &str,
+) -> Result<(DocumentRuleResponse), reqwest::Error> {
     // Read a file
     let document = std::fs::read_to_string("code.js").unwrap();
 
@@ -50,14 +52,21 @@ async fn main() {
     .await
     .unwrap();
 
-    if !body.pass {
+    Ok(body)
+}
+
+#[tokio::main]
+async fn main() {
+    let resp = check("code.js", "rules/dummy.md").await.unwrap();
+
+    if !resp.pass {
         // Print the error message
-        eprintln!("{}", body.message.red());
+        eprintln!("{}", resp.message.red());
 
         // Exit with a non-zero exit code
         std::process::exit(1);
     }
 
     // Print the success message
-    eprintln!("{}", body.message);
+    eprintln!("{}", resp.message);
 }
