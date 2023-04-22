@@ -26,7 +26,7 @@ Next, let's create a new rule. For example, let's create a rule that checks that
 any obvious vulnerabilities.
 
 ```bash
-$ rules new vulnerabilities
+$ rules add vulnerabilities
 ```
 
 This will create a file called `vulernabilities.txt` in the `rules` folder. Open it up, and
