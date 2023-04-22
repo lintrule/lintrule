@@ -22,16 +22,16 @@ export const handleCheck = async (req: Request): Promise<Response> => {
       },
       {
         role: "user",
-        content: `${rule}`,
+        content: `<|RULE|>\n\n\n${rule}\n\n\n<|ENDRULE|>`,
       },
       {
         role: "user",
-        content: `${document}`,
+        content: `<|DOCUMENT|>\n\n\n${document}\n\n\n<|ENDDOCUMENT|>`,
       },
       {
         role: "system",
         content:
-          "If the document passes the rule, type 'pass'. Otherwise, explain what's wrong using markdown",
+          "If the document passes the rule, type the word 'pass'. Otherwise, explain what's wrong using markdown",
       },
     ],
   });

@@ -1,1 +1,1 @@
-don't log stuff
+don't log customer data. It's cool to log other things.
