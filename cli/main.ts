@@ -1,7 +1,5 @@
 import { walkFiles } from "./walkFiles.ts";
 
-console.log("hi");
-
 const root = ".";
 const gitignorePath = ".gitignore";
 

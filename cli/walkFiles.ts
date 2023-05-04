@@ -3,6 +3,7 @@ import {
   WalkEntry,
   WalkOptions,
 } from "https://deno.land/std@0.115.0/fs/mod.ts";
+import ignore from "./ignore.js";
 
 export async function* walkFiles(
   root: string,
@@ -16,10 +17,14 @@ export async function* walkFiles(
     exts: [], // List of extensions to include, empty for all
   };
 
+  // gitignore content to lines
+  const ignoreLines = gitignoreContent.split("\n");
+  const ig = ignore().add(ignoreLines);
+
   for await (const entry of walk(root, walkOptions)) {
-    // if (!ignore.ignores(entry.path)) {
-    //   yield entry;
-    // }
+    if (!ig.ignores(entry.path)) {
+      yield entry;
+    }
     yield entry;
   }
 }
