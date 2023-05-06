@@ -78,6 +78,11 @@ export async function* walkTextFiles(
       continue;
     }
 
+    // If it's in the rules directory, skip it
+    if (relative(root, entry.path).startsWith("rules")) {
+      continue;
+    }
+
     yield entry;
   }
 }
