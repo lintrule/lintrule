@@ -11,19 +11,24 @@ export async function* walkFiles(
 ): AsyncGenerator<WalkEntry> {
   const gitignoreContent = await Deno.readTextFile(gitignorePath);
 
-  const walkOptions: WalkOptions = {
-    includeDirs: false,
-    skip: [/^\./], // Skips hidden files and directories by default
-    exts: [], // List of extensions to include, empty for all
-  };
+  const walkOptions: WalkOptions = {};
 
   // gitignore content to lines
   const ignoreLines = gitignoreContent.split("\n");
   const ig = ignore().add(ignoreLines);
 
   for await (const entry of walk(root, walkOptions)) {
-    if (!ig.ignores(entry.path)) {
-      yield entry;
+    // Ignore the .git folder
+    if (entry.path.includes(".git")) {
+      continue;
+    }
+
+    if (entry.isDirectory) {
+      continue;
+    }
+
+    if (ig.ignores(entry.path)) {
+      continue;
     }
     yield entry;
   }
