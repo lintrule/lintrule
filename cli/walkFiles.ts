@@ -4,6 +4,7 @@ import {
   WalkOptions,
 } from "https://deno.land/std@0.115.0/fs/mod.ts";
 import ignore from "./ignore.js";
+import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 export async function* walkFiles(
   root: string,
@@ -26,6 +27,10 @@ export async function* walkFiles(
     if (entry.isDirectory) {
       continue;
     }
+
+    // Turn this into a relative path so it matches the gitignore
+    // in deno
+    entry.path = relative(root, entry.path);
 
     if (ig.ignores(entry.path)) {
       continue;
