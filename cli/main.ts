@@ -3,6 +3,7 @@ import { check } from "./rules.ts";
 import { walkTextFiles } from "./walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
+import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 
 const rootDir = await findRoot();
 
@@ -22,7 +23,6 @@ async function checkRuleAgainstEntry(rulePath: string, entryPath: string) {
       )} ${relativeEntry} ${relativeRuleEntry}`
     );
   } else {
-    fails += 1;
     console.log(
       `${colors.bgRed(
         colors.brightWhite(" FAIL ")
@@ -31,22 +31,23 @@ async function checkRuleAgainstEntry(rulePath: string, entryPath: string) {
   }
 }
 
-const now = Date.now();
-let fails = 0;
-const promises = [];
-for await (const entry of walkTextFiles(root, gitignorePath)) {
-  // for every file in the rules dir
-  for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
-    promises.push(checkRuleAgainstEntry(ruleEntry.path, entry.path));
+async function checkCmd() {
+  const promises = [];
+  for await (const entry of walkTextFiles(root, gitignorePath)) {
+    // for every file in the rules dir
+    for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
+      promises.push(checkRuleAgainstEntry(ruleEntry.path, entry.path));
+    }
   }
+  await Promise.all(promises);
 }
-await Promise.all(promises);
 
-if (fails) {
-  console.log(colors.dim(`Finished in ${Date.now() - now}ms`));
-  console.log(colors.red(`${fails} rules failed`));
-  Deno.exit(1);
-} else {
-  console.log(colors.dim(`Finished in ${Date.now() - now}ms`));
-  console.log(colors.green("All rules passed"));
-}
+await new Command()
+  .name("rules")
+  .version("0.0.1")
+  .description("The english test framework")
+  .action(() => console.log("Help command goes here."))
+  .command("check", "Check this repository against all rules.")
+  .option("-f, --foo", "Foo option.")
+  .action((_options, ..._args) => checkCmd())
+  .parse(Deno.args);
