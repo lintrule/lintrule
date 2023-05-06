@@ -6,26 +6,13 @@ import {
 import ignore from "./ignore.js";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 
-async function isMaybeBinaryFile(filePath: string): Promise<boolean> {
-  const data = await Deno.readFile(filePath);
-
-  for (const byte of data) {
-    // Check if the byte represents a non-printable ASCII character (0 to 31, excluding 9, 10, and 13)
-    if (byte < 32 && byte !== 9 && byte !== 10 && byte !== 13) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 async function isTooLong(filePath: string, kbs: number): Promise<boolean> {
   const data = await Deno.readFile(filePath);
 
   return data.length > 1024 * kbs;
 }
 
-export async function* walkFiles(
+export async function* walkTextFiles(
   root: string,
   gitignorePath: string
 ): AsyncGenerator<WalkEntry> {
@@ -82,17 +69,7 @@ export async function* walkFiles(
 
     // Turn this into a relative path so it matches the gitignore
     // in deno
-    entry.path = relative(root, entry.path);
-
-    if (ig.ignores(entry.path)) {
-      continue;
-    }
-
-    if (await isMaybeBinaryFile(entry.path)) {
-      console.warn(
-        "Skipping file because it looks like a binary file:",
-        entry.path
-      );
+    if (ig.ignores(relative(root, entry.path))) {
       continue;
     }
 
