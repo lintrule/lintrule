@@ -9,7 +9,7 @@ export interface DocumentRuleResponse {
   message?: string;
 }
 
-export async function sendRule(
+async function sendRule(
   url: string,
   documentRule: DocumentRule
 ): Promise<DocumentRuleResponse> {
@@ -53,5 +53,3 @@ export async function check(
 
   return body;
 }
-
-console.log("hi");
