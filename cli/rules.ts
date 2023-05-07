@@ -43,11 +43,11 @@ async function sendRule({
 
 export async function check({
   documentPath,
-  apiHost,
+  host,
   rulePath,
   accessToken,
 }: {
-  apiHost: string;
+  host: string;
   documentPath: string;
   rulePath: string;
   accessToken: string;
@@ -59,7 +59,7 @@ export async function check({
   const rule = await Deno.readTextFile(rulePath);
 
   const body = await sendRule({
-    url: `${apiHost}/check`,
+    url: `${host}/api/check`,
     accessToken,
     documentRule: {
       document,

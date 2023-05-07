@@ -52,13 +52,10 @@ async function openBrowser(url: string) {
   process.close();
 }
 
-async function completeChallenge(props: {
-  loginHost: string;
-  challenge: string;
-}) {
+async function completeChallenge(props: { host: string; challenge: string }) {
   // Make a challenge request
   const challengeResponse = await fetch(
-    `${props.loginHost}/api/challenges/complete`,
+    `${props.host}/api/challenges/complete`,
     {
       method: "POST",
       headers: {
@@ -85,12 +82,9 @@ async function completeChallenge(props: {
   return result;
 }
 
-export async function login(props: {
-  accessToken?: string;
-  loginHost: string;
-}) {
+export async function loginCmd(props: { accessToken?: string; host: string }) {
   // Make a challenge request
-  const challengeResponse = await fetch(`${props.loginHost}/api/challenges`, {
+  const challengeResponse = await fetch(`${props.host}/api/challenges`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -111,7 +105,7 @@ export async function login(props: {
   }
 
   // Open the challenge url in the browser
-  const challengeUrl = `${props.loginHost}/auth/cli?challenge=${challenge.challenge}`;
+  const challengeUrl = `${props.host}/auth/cli?challenge=${challenge.challenge}`;
   await openBrowser(challengeUrl);
 
   console.log(
@@ -123,7 +117,7 @@ export async function login(props: {
 
   while (true) {
     const result = await completeChallenge({
-      loginHost: props.loginHost,
+      host: props.host,
       challenge: challenge.challenge,
     });
 

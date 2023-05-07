@@ -14,13 +14,13 @@ const gitignorePath = ".gitignore";
 async function checkRuleAgainstEntry(props: {
   rulePath: string;
   entryPath: string;
-  apiHost: string;
+  host: string;
   accessToken: string;
 }) {
   const result = await check({
     documentPath: props.entryPath,
     rulePath: props.rulePath,
-    apiHost: props.apiHost,
+    host: props.host,
     accessToken: props.accessToken,
   });
 
@@ -41,7 +41,7 @@ async function checkRuleAgainstEntry(props: {
   }
 }
 
-export async function checkCmd(props: { apiHost: string }) {
+export async function checkCmd(props: { host: string }) {
   const config = await readConfig();
   if (!config.accessToken) {
     console.log("Please run 'rules login' first.");
@@ -54,7 +54,7 @@ export async function checkCmd(props: { apiHost: string }) {
     for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
       promises.push(
         checkRuleAgainstEntry({
-          apiHost: props.apiHost,
+          host: props.host,
           rulePath: ruleEntry.path,
           entryPath: entry.path,
           accessToken: config.accessToken,
