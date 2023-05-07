@@ -5,8 +5,9 @@ GITHUB_REPO="Flaque/lintrule"
 BINARY_NAME="rules"
 
 # Define the target directory where the 'rules' CLI binary will be installed.
-# You can use '/usr/local/bin' as a common location that is usually in the user's PATH.
-TARGET_DIR="/usr/local/bin"
+# You can use '/usr/.local/bin' as a common location that is sometimes 
+# in the user's PATH.
+TARGET_DIR="${HOME}/.local/bin"
 
 # Define the target file path for the 'rules' CLI binary.
 TARGET_FILE="${TARGET_DIR}/${BINARY_NAME}"
@@ -28,16 +29,31 @@ fi
 
 # Download the 'rules' CLI binary from the specified URL.
 echo "Downloading '${BINARY_NAME}' CLI binary..."
-curl -s -L -o "${TARGET_FILE}" "${RULES_BINARY_URL}"
+echo "curl -L -o \"${TARGET_FILE}\" \"${RULES_BINARY_URL}\""
+curl -L -o "${TARGET_FILE}" "${RULES_BINARY_URL}"
 
 # Make the downloaded binary executable.
 chmod +x "${TARGET_FILE}"
 
-# Verify that the 'rules' CLI binary is successfully installed and accessible.
-if command -v "${BINARY_NAME}" >/dev/null 2>&1; then
+
+# Verify that the 'rules' CLI binary is successfully installed.
+if [ -f "${TARGET_FILE}" ]; then
     echo "Successfully installed '${BINARY_NAME}' CLI."
-    echo "You can now use the '${BINARY_NAME}' command."
+    echo "The binary is located at '${TARGET_FILE}'."
+
+    # Provide instructions for adding the target directory to the PATH.
+    echo ""
+    echo "To use the '${BINARY_NAME}' command, add '${TARGET_DIR}' to your PATH."
+    echo "You can do this by running one of the following commands, depending on your shell:"
+    echo ""
+    echo "For bash:"
+    echo "  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
+    echo ""
+    echo "For zsh:"
+    echo "  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.zshrc && source ~/.zshrc"
+    echo ""
+    echo "After running the appropriate command, you can use '${BINARY_NAME}'."
+
 else
-    echo "Installation failed. '${BINARY_NAME}' CLI is not accessible."
-    echo "Make sure that '${TARGET_DIR}' is part of your PATH."
+    echo "Installation failed. '${BINARY_NAME}' CLI could not be installed."
 fi
