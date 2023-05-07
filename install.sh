@@ -17,7 +17,7 @@ LATEST_RELEASE_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
 LATEST_RELEASE_JSON=$(curl -s "${LATEST_RELEASE_URL}")
 
 # Extract the download URL for the 'rules' binary from the release information.
-RULES_BINARY_URL=$(echo "${LATEST_RELEASE_JSON}" | grep -oP '"browser_download_url": "\K[^"]+' | grep "${BINARY_NAME}")
+RULES_BINARY_URL=$(echo "${LATEST_RELEASE_JSON}" | grep "\"browser_download_url\":" | grep "${BINARY_NAME}" | sed -n 's/.*"browser_download_url": "\(.*\)"/\1/p')
 
 # Check if the download URL was found.
 if [ -z "${RULES_BINARY_URL}" ]; then
