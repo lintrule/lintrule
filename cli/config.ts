@@ -17,6 +17,10 @@ function getConfigPath() {
     case "darwin":
       return join(Deno.env.get("HOME") || "", ".lintrule", "config.json");
   }
+
+  // Even though this is technically unreachable from the types
+  // if you don't have this here, `compile` doesn't work.
+  throw new Error("Unsupported platform: " + Deno.build.os);
 }
 
 export async function ensureEntirePath() {
