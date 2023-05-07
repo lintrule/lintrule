@@ -1,3 +1,3 @@
 # Lintrule
 
-Lintrule is a linter.
+Lintrule is a new kind of linter and test framework.
