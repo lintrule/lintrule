@@ -127,7 +127,7 @@ export async function loginCmd(props: { accessToken?: string; host: string }) {
     } else if (result.status === "complete") {
       // Store the access token and exit
       await writeConfig({ accessToken: result.access_token });
-      console.log(colors.bgGreen(" You're logged in! "));
+      console.log(colors.green("You're logged in!"));
       Deno.exit(0);
     }
   }
