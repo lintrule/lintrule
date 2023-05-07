@@ -3,6 +3,7 @@ import { check } from "../rules.ts";
 import { walkTextFiles } from "../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
+import { readConfig } from "../config.ts";
 
 const rootDir = await findRoot();
 
@@ -14,8 +15,14 @@ async function checkRuleAgainstEntry(props: {
   rulePath: string;
   entryPath: string;
   apiHost: string;
+  accessToken: string;
 }) {
-  const result = await check(props.apiHost, props.entryPath, props.rulePath);
+  const result = await check({
+    documentPath: props.entryPath,
+    rulePath: props.rulePath,
+    apiHost: props.apiHost,
+    accessToken: props.accessToken,
+  });
 
   const relativeEntry = relative(root, props.entryPath);
   const relativeRuleEntry = relative(root, props.rulePath);
@@ -35,6 +42,12 @@ async function checkRuleAgainstEntry(props: {
 }
 
 export async function checkCmd(props: { apiHost: string }) {
+  const config = await readConfig();
+  if (!config.accessToken) {
+    console.log("Please run 'rules login' first.");
+    Deno.exit(1);
+  }
+
   const promises = [];
   for await (const entry of walkTextFiles(root, gitignorePath)) {
     // for every file in the rules dir
@@ -44,6 +57,7 @@ export async function checkCmd(props: { apiHost: string }) {
           apiHost: props.apiHost,
           rulePath: ruleEntry.path,
           entryPath: entry.path,
+          accessToken: config.accessToken,
         })
       );
     }

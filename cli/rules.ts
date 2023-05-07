@@ -9,13 +9,19 @@ export interface DocumentRuleResponse {
   message?: string;
 }
 
-async function sendRule(
-  url: string,
-  documentRule: DocumentRule
-): Promise<DocumentRuleResponse> {
+async function sendRule({
+  url,
+  accessToken,
+  documentRule,
+}: {
+  url: string;
+  accessToken: string;
+  documentRule: DocumentRule;
+}): Promise<DocumentRuleResponse> {
   // Create a headers object with the content type
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
+  headers.append("Authorization", `Bearer ${accessToken}`);
 
   // Send the POST request to the given URL with document and rule as parameters
   const res = await fetch(url, {
@@ -35,20 +41,30 @@ async function sendRule(
   return body;
 }
 
-export async function check(
-  domain: string,
-  documentPath: string,
-  rulePath: string
-): Promise<DocumentRuleResponse> {
+export async function check({
+  documentPath,
+  apiHost,
+  rulePath,
+  accessToken,
+}: {
+  apiHost: string;
+  documentPath: string;
+  rulePath: string;
+  accessToken: string;
+}): Promise<DocumentRuleResponse> {
   // Read the document
   const document = await Deno.readTextFile(documentPath);
 
   // Read the rule
   const rule = await Deno.readTextFile(rulePath);
 
-  const body = await sendRule(`${domain}/check`, {
-    document,
-    rule,
+  const body = await sendRule({
+    url: `${apiHost}/check`,
+    accessToken,
+    documentRule: {
+      document,
+      rule,
+    },
   });
 
   return body;
