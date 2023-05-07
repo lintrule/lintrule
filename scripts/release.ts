@@ -54,7 +54,7 @@ async function compileDistribution() {
     cmd: [
       "deno",
       "compile",
-      "--ouput",
+      "--output",
       "dist/rules",
       "--allow-read",
       "--allow-write",
