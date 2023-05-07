@@ -1,12 +1,15 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import { loginCmd } from "./cmds/login.ts";
 import { checkCmd } from "./cmds/check.ts";
+import { readVersion } from "./version.ts";
 
-await new Command()
+const version = await readVersion();
+
+const cmd: any = new Command()
   .name("rules")
-  .version("0.0.1")
+  .version(version)
   .description("The english test framework")
-  .action(() => console.log("Help command goes here."))
+  .action(() => cmd.showHelp())
   .command("check", "Check this repository against all rules.")
   .option("--host [host]", "A specific api deployment of lintrule")
   .action((options, ..._args) =>
@@ -20,5 +23,6 @@ await new Command()
     loginCmd({
       host: options.host?.toString() || "https://lintrule.com",
     });
-  })
-  .parse(Deno.args);
+  });
+
+await cmd.parse(Deno.args);

@@ -1,5 +1,6 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
+import { readVersion } from "../cli/version.ts";
 
 function logAndError(msg: string) {
   console.log(colors.bgRed(" Error "), colors.red(msg));
@@ -17,11 +18,16 @@ try {
   logAndError("Please install the 'gh' command first: brew install gh");
 }
 
-function bumpVersion(
+function bumpedVersion(
   version: string,
   type: "major" | "minor" | "patch" | "prerelease"
 ) {
-  const [major, minor, patch] = version.split(".").map((v) => parseInt(v));
+  const [major, minor, patch] = version.split(".").map((v) =>
+    parseInt(
+      // Remove everything after the - if there is one
+      v.includes("-") ? v.split("-")[0] : v
+    )
+  );
   switch (type) {
     case "major":
       return `${major + 1}.0.0`;
@@ -34,23 +40,28 @@ function bumpVersion(
   }
 }
 
-async function readVersion() {
-  // Look for the 'cli.json' file
+async function saveVersion(version: string) {
+  // Save the version in the cli.json file
   const cliJsonPath = "cli/cli.json";
   const cliJson = await Deno.readTextFile(cliJsonPath);
-
-  // Parse the JSON
   const cli = JSON.parse(cliJson);
-  if (!cli.version) {
-    logAndError("No 'version' found in cli/cli.json");
-  }
-
-  return cli.version;
+  cli.version = version;
+  await Deno.writeTextFile(cliJsonPath, JSON.stringify(cli, null, 2));
 }
 
 async function compileDistribution() {
   const p = Deno.run({
-    cmd: ["deno", "compile", "cli/main.ts", "--ouput", "dist/rules"],
+    cmd: [
+      "deno",
+      "compile",
+      "--ouput",
+      "dist/rules",
+      "--allow-read",
+      "--allow-write",
+      "--allow-env",
+      "--allow-net",
+      "cli/main.ts",
+    ],
   });
   const status = await p.status();
   if (!status.success) {
@@ -107,8 +118,9 @@ await new Command()
       return;
     }
     const version = await readVersion();
-    const newVersion = bumpVersion(version, type);
+    const bumped = bumpedVersion(version, type);
+    await saveVersion(bumped);
     await compileDistribution();
-    await createRelease(newVersion);
+    await createRelease(bumped);
   })
   .parse(Deno.args);
