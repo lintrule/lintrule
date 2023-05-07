@@ -1,4 +1,8 @@
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
+import {
+  SpinnerTypes,
+  TerminalSpinner,
+} from "https://deno.land/x/spinners/mod.ts";
 import { writeConfig } from "../config.ts";
 
 export interface CompleteResponse {
@@ -108,12 +112,17 @@ export async function loginCmd(props: { accessToken?: string; host: string }) {
   const challengeUrl = `${props.host}/auth/cli?challenge=${challenge.challenge}`;
   await openBrowser(challengeUrl);
 
-  console.log(
-    "If your browser does not open automatically, click here:",
-    challengeUrl
-  );
-
   // Poll the challenge endpoint until it's complete
+  const spinner = new TerminalSpinner({
+    text: "Click here: " + challengeUrl,
+    color: "blue", // see colors in util.ts
+    spinner: SpinnerTypes.arc, // check the SpinnerTypes - see import
+    indent: 0, // The level of indentation of the spinner in spaces
+    cursor: false, // Whether or not to display a cursor when the spinner is active
+    writer: Deno.stdout, // anything using the Writer interface incl. stdout, stderr, and files
+  });
+
+  spinner.start();
 
   while (true) {
     const result = await completeChallenge({
@@ -127,6 +136,7 @@ export async function loginCmd(props: { accessToken?: string; host: string }) {
     } else if (result.status === "complete") {
       // Store the access token and exit
       await writeConfig({ accessToken: result.access_token });
+      spinner.succeed();
       console.log(colors.green("You're logged in!"));
       Deno.exit(0);
     }
