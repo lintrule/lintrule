@@ -1,4 +1,5 @@
 // The root folder is the one with the `rules` directory in it.
+import { join } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 const RULES_FOLDER_NAME = "rules";
 
@@ -23,7 +24,8 @@ export async function findRoot() {
   // or we run out of parents
   let parent = root;
   while (true) {
-    parent = new URL("..", parent).pathname;
+    parent = join(parent, "..");
+
     if (await isRoot(parent)) {
       return parent;
     } else if (parent === "/") {
