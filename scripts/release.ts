@@ -61,6 +61,7 @@ async function compileDistribution() {
       "--allow-write",
       "--allow-env",
       "--allow-net",
+      "--allow-run",
       "cli/main.ts",
     ],
   });
