@@ -9,6 +9,9 @@ BINARY_NAME="rules"
 # in the user's PATH.
 TARGET_DIR="${HOME}/.local/bin"
 
+# Make sure the target dir exists
+mkdir -p "${TARGET_DIR}"
+
 # Define the target file path for the 'rules' CLI binary.
 TARGET_FILE="${TARGET_DIR}/${BINARY_NAME}"
 
