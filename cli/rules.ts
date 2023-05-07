@@ -30,6 +30,10 @@ async function sendRule({
     body: JSON.stringify(documentRule),
   });
 
+  if (res.status === 401) {
+    throw new Error("Please login again!");
+  }
+
   // Check if the response is ok
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);
