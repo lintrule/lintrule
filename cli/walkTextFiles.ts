@@ -55,7 +55,9 @@ export async function* walkTextFiles(
     .addPattern("*.xls") // ignore xls
     .addPattern("*.xlsx") // ignore xlsx
     .addPattern("*.ppt") // ignore ppt
-    .addPattern("*.pptx"); // ignore pptx
+    .addPattern("*.pptx") // ignore pptx
+    .addPattern("*.pyc") // ignore pycs
+    .addPattern("*.ipynb"); // ignore ipynbs
 
   for await (const entry of walk(root, walkOptions)) {
     // Ignore the .git folder
