@@ -35,7 +35,12 @@ export async function estimateBillingCommand() {
 
   // For each change, try to find the file, count how many lines
   // of code it is, and then add it to the total
+  const ig = ignore().add(ignoredPatterns);
   for (const change of changes) {
+    if (ig.ignores(change.filename)) {
+      continue;
+    }
+
     try {
       const size = await Deno.stat(change.filename).then((s) => s.size);
       linesOfCode += size;
