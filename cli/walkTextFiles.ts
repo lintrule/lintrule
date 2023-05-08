@@ -12,6 +12,43 @@ async function isTooLong(filePath: string, kbs: number): Promise<boolean> {
   return data.length > 1024 * kbs;
 }
 
+export const ignoredPatterns = [
+  "*.lock", // ignore lock files
+  "*.log", // ignore log files
+  "*.jpeg", // ignore jpegs
+  "*.jpg", // ignore jpgs
+  "*.png", // ignore pngs
+  "*.gif", // ignore gifs
+  "*.mp4", // ignore mp4s
+  "*.mp3", // ignore mp3s
+  "*.wav", // ignore wavs
+  "*.ogg", // ignore oggs
+  "*.webm", // ignore webms
+  "*.mov", // ignore movs
+  "*.avi", // ignore avis
+  "*.mkv", // ignore mkvs
+  "*.flv", // ignore flvs
+  "*.wmv", // ignore wmvs
+  "*.m4v", // ignore m4vs
+  "*.m4a", // ignore m4as
+  "*.flac", // ignore flacs
+  "*.opus", // ignore opuses
+  "*.zip", // ignore zips
+  "*.tar", // ignore tars
+  "*.gz", // ignore gzs
+  "*.7z", // ignore 7zs
+  "*.rar", // ignore rars
+  "*.pdf", // ignore pdfs
+  "*.doc", // ignore docs
+  "*.docx", // ignore docxs
+  "*.xls", // ignore xls
+  "*.xlsx", // ignore xlsx
+  "*.ppt", // ignore ppt
+  "*.pptx", // ignore pptx
+  "*.pyc", // ignore pycs
+  "*.ipynb", // ignore ipynbs
+];
+
 export async function* walkTextFiles(
   root: string,
   gitignorePath: string
@@ -22,42 +59,7 @@ export async function* walkTextFiles(
 
   // gitignore content to lines
   const ignoreLines = gitignoreContent.split("\n");
-  const ig = ignore()
-    .add(ignoreLines)
-    .addPattern("*.lock") // ignore lock files
-    .addPattern("*.log") // ignore log files
-    .addPattern("*.jpeg") // ignore jpegs
-    .addPattern("*.jpg") // ignore jpgs
-    .addPattern("*.png") // ignore pngs
-    .addPattern("*.gif") // ignore gifs
-    .addPattern("*.mp4") // ignore mp4s
-    .addPattern("*.mp3") // ignore mp3s
-    .addPattern("*.wav") // ignore wavs
-    .addPattern("*.ogg") // ignore oggs
-    .addPattern("*.webm") // ignore webms
-    .addPattern("*.mov") // ignore movs
-    .addPattern("*.avi") // ignore avis
-    .addPattern("*.mkv") // ignore mkvs
-    .addPattern("*.flv") // ignore flvs
-    .addPattern("*.wmv") // ignore wmvs
-    .addPattern("*.m4v") // ignore m4vs
-    .addPattern("*.m4a") // ignore m4as
-    .addPattern("*.flac") // ignore flacs
-    .addPattern("*.opus") // ignore opuses
-    .addPattern("*.zip") // ignore zips
-    .addPattern("*.tar") // ignore tars
-    .addPattern("*.gz") // ignore gzs
-    .addPattern("*.7z") // ignore 7zs
-    .addPattern("*.rar") // ignore rars
-    .addPattern("*.pdf") // ignore pdfs
-    .addPattern("*.doc") // ignore docs
-    .addPattern("*.docx") // ignore docxs
-    .addPattern("*.xls") // ignore xls
-    .addPattern("*.xlsx") // ignore xlsx
-    .addPattern("*.ppt") // ignore ppt
-    .addPattern("*.pptx") // ignore pptx
-    .addPattern("*.pyc") // ignore pycs
-    .addPattern("*.ipynb"); // ignore ipynbs
+  const ig = ignore().add(ignoreLines).add(ignoredPatterns);
 
   for await (const entry of walk(root, walkOptions)) {
     // Ignore the .git folder

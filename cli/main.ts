@@ -3,6 +3,7 @@ import { loginCmd } from "./cmds/login.ts";
 import { checkCmd } from "./cmds/check.ts";
 import { readVersion } from "./version.ts";
 import { initCmd } from "./cmds/init.ts";
+import { estimateBillingCommand } from "./cmds/estimate-billing.ts";
 
 const version = await readVersion();
 
@@ -26,6 +27,8 @@ const cmd: any = new Command()
     loginCmd({
       host: options.host?.toString() || "https://lintrule.com",
     });
-  });
+  })
+  .command("estimate-billing", "Estimate your billing for this repository")
+  .action(() => estimateBillingCommand());
 
 await cmd.parse(Deno.args);
