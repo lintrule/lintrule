@@ -1,9 +1,7 @@
-import ignore from "../ignore.js";
-import { ignoredPatterns } from "../walkTextFiles.ts";
-
 export async function estimateBillingCommand() {
   // git log with numstat
   // git log --since="$one_month_ago" --until="$current_date" --numstat --pretty=format:""
+
   const log = Deno.run({
     cmd: [
       "git",
@@ -31,23 +29,16 @@ export async function estimateBillingCommand() {
       };
     });
 
-  let linesOfCode = 0;
-
-  // For each change, try to find the file, count how many lines
-  // of code it is, and then add it to the total
-  const ig = ignore().add(ignoredPatterns);
-  for (const change of changes) {
-    if (ig.ignores(change.filename)) {
-      continue;
+  const contextBufferSize = 50;
+  const linesOfCode = changes.reduce((acc, change) => {
+    if (!change.additions) {
+      return acc;
     }
 
-    try {
-      const size = await Deno.stat(change.filename).then((s) => s.size);
-      linesOfCode += size;
-    } catch (e) {
-      linesOfCode += 500;
-    }
-  }
+    return acc + change.additions + contextBufferSize;
+  }, 0);
 
-  console.log(`Lintrule would cost $${linesOfCode / 1000} in the last month`);
+  console.log(
+    `Lintrule would cost $${linesOfCode / 1000} in the last month per rule`
+  );
 }
