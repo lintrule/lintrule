@@ -44,5 +44,5 @@ export async function estimateBillingCommand() {
     }
   }
 
-  console.log(linesOfCode / 1000, "kloc");
+  console.log(`Lintrule would cost $${linesOfCode / 1000} in the last month`);
 }
