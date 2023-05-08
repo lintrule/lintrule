@@ -44,5 +44,5 @@ export async function estimateBillingCommand() {
     }
   }
 
-  console.log(linesOfCode / 1000, "$$");
+  console.log(linesOfCode / 1000, "kloc");
 }
