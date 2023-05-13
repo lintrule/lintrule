@@ -48,19 +48,33 @@ export async function checkCmd(props: { host: string }) {
     Deno.exit(1);
   }
 
-  const promises = [];
+  const files = [];
   for await (const entry of walkTextFiles(root, gitignorePath)) {
     // for every file in the rules dir
     for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
-      promises.push(
-        checkRuleAgainstEntry({
-          host: props.host,
-          rulePath: ruleEntry.path,
-          entryPath: entry.path,
-          accessToken: config.accessToken,
-        })
-      );
+      files.push({
+        entryPath: entry.path,
+        rulePath: ruleEntry.path,
+      });
     }
   }
+
+  // Add a little sanity check for runaway files atm
+  if (files.length > 25) {
+    throw new Error("Too many files to check at once. Please check less files");
+  }
+
+  const promises = [];
+  for (const file of files) {
+    promises.push(
+      checkRuleAgainstEntry({
+        host: props.host,
+        rulePath: file.rulePath,
+        entryPath: file.entryPath,
+        accessToken: config.accessToken,
+      })
+    );
+  }
+
   await Promise.all(promises);
 }

@@ -9,6 +9,9 @@ async function isRoot(folder: string) {
     if (entry.name === RULES_FOLDER_NAME) {
       return true;
     }
+    if (entry.name === ".git") {
+      return true;
+    }
   }
   return false;
 }
