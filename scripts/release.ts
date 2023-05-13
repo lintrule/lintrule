@@ -94,6 +94,32 @@ async function createRelease(version: string) {
   if (!status.success) {
     logAndError("Failed to create the release");
   }
+
+  // git add cli/cli.json
+  // and commit with the name `release: vVersion`
+  const p2 = Deno.run({
+    cmd: ["git", "add", "cli/cli.json"],
+  });
+  const status2 = await p2.status();
+  if (!status2.success) {
+    logAndError("Failed to add cli/cli.json");
+  }
+
+  const p3 = Deno.run({
+    cmd: ["git", "commit", "-m", `release: v${version}`],
+  });
+  const status3 = await p3.status();
+  if (!status3.success) {
+    logAndError("Failed to commit cli/cli.json");
+  }
+
+  const p4 = Deno.run({
+    cmd: ["git", "push"],
+  });
+  const status4 = await p4.status();
+  if (!status4.success) {
+    logAndError("Failed to push cli/cli.json");
+  }
 }
 
 await new Command()
