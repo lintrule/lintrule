@@ -4,6 +4,7 @@ import { walkTextFiles } from "../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../config.ts";
+import { getChanges } from "../git.ts";
 
 const rootDir = await findRoot();
 
@@ -13,19 +14,23 @@ const gitignorePath = ".gitignore";
 
 async function checkRuleAgainstEntry(props: {
   rulePath: string;
-  entryPath: string;
+  change: {
+    file: string;
+    snippet: string;
+  };
   host: string;
   accessToken: string;
 }) {
   const result = await check({
-    documentPath: props.entryPath,
+    change: props.change,
     rulePath: props.rulePath,
     host: props.host,
     accessToken: props.accessToken,
   });
 
-  const relativeEntry = relative(root, props.entryPath);
+  const relativeEntry = relative(root, props.change.file);
   const relativeRuleEntry = relative(root, props.rulePath);
+
   if (result.pass) {
     console.log(
       `${colors.bgGreen(
@@ -49,11 +54,11 @@ export async function checkCmd(props: { host: string }) {
   }
 
   const files = [];
-  for await (const entry of walkTextFiles(root, gitignorePath)) {
+  for await (const change of getChanges()) {
     // for every file in the rules dir
     for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
       files.push({
-        entryPath: entry.path,
+        change,
         rulePath: ruleEntry.path,
       });
     }
@@ -70,7 +75,7 @@ export async function checkCmd(props: { host: string }) {
       checkRuleAgainstEntry({
         host: props.host,
         rulePath: file.rulePath,
-        entryPath: file.entryPath,
+        change: file.change,
         accessToken: config.accessToken,
       })
     );

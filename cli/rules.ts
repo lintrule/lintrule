@@ -51,19 +51,19 @@ async function sendRule({
 }
 
 export async function check({
-  documentPath,
+  change,
   host,
   rulePath,
   accessToken,
 }: {
   host: string;
-  documentPath: string;
+  change: {
+    file: string;
+    snippet: string;
+  };
   rulePath: string;
   accessToken: string;
 }): Promise<DocumentRuleResponse> {
-  // Read the document
-  const document = await Deno.readTextFile(documentPath);
-
   // Read the rule
   const rule = await Deno.readTextFile(rulePath);
 
@@ -71,7 +71,7 @@ export async function check({
     url: `${host}/api/check`,
     accessToken,
     documentRule: {
-      document,
+      document: change.snippet,
       rule,
     },
   });
