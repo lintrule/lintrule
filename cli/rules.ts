@@ -34,6 +34,11 @@ async function sendRule({
     throw new Error("Please login again!");
   }
 
+  // Payment required
+  if (res.status === 402) {
+    throw new Error("Please setup your billing details!");
+  }
+
   // Check if the response is ok
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);
