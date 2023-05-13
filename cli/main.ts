@@ -10,7 +10,7 @@ const version = await readVersion();
 const cmd: any = new Command()
   .name("rules")
   .version(version)
-  .description("The english test framework")
+  .description("The plain language test framework")
   .action(() => cmd.showHelp())
   .command("init", "Add a rules folder with a demo rule")
   .action(() => initCmd())
