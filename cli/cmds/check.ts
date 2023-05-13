@@ -60,7 +60,7 @@ export async function checkCmd(props: { host: string }) {
   }
 
   // Add a little sanity check for runaway files atm
-  if (files.length > 25) {
+  if (files.length > 100) {
     throw new Error("Too many files to check at once. Please check less files");
   }
 

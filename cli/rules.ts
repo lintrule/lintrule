@@ -67,16 +67,14 @@ export async function check({
   // Read the rule
   const rule = await Deno.readTextFile(rulePath);
 
-  // const body = await sendRule({
-  //   url: `${host}/api/check`,
-  //   accessToken,
-  //   documentRule: {
-  //     document,
-  //     rule,
-  //   },
-  // });
+  const body = await sendRule({
+    url: `${host}/api/check`,
+    accessToken,
+    documentRule: {
+      document,
+      rule,
+    },
+  });
 
-  return {
-    pass: true,
-  };
+  return body;
 }
