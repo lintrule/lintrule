@@ -4,6 +4,7 @@ import { checkCmd } from "./cmds/check.ts";
 import { readVersion } from "./version.ts";
 import { initCmd } from "./cmds/init.ts";
 import { estimateBillingCommand } from "./cmds/estimate-billing.ts";
+import { upgrade } from "./cmds/upgrade.ts";
 
 const version = await readVersion();
 
@@ -14,7 +15,7 @@ const cmd: any = new Command()
   .action(() => cmd.showHelp())
   .command("init", "Add a rules folder with a demo rule")
   .action(() => initCmd())
-  .command("check", "Check this repository against all rules.")
+  .command("check", "Check this repository against all rules")
   .option("--host [host]", "A specific api deployment of lintrule")
   .action((options, ..._args) =>
     checkCmd({
@@ -28,7 +29,9 @@ const cmd: any = new Command()
       host: options.host?.toString() || "https://lintrule.com",
     });
   })
-  .command("estimate-billing", "Estimate your billing for this repository")
-  .action(() => estimateBillingCommand());
+  .command("estimate-billing", "Estimate your invoice for this repository")
+  .action(() => estimateBillingCommand())
+  .command("upgrade", "Upgrade lintrule to the latest version")
+  .action(() => upgrade());
 
 await cmd.parse(Deno.args);
