@@ -4,7 +4,7 @@ import { walkTextFiles } from "../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../config.ts";
-import { getChanges } from "../git.ts";
+import { getChangesAsFiles, getChangesAsHunks } from "../git.ts";
 
 const rootDir = await findRoot();
 
@@ -54,7 +54,7 @@ export async function checkCmd(props: { host: string }) {
   }
 
   const files = [];
-  for await (const change of getChanges()) {
+  for await (const change of getChangesAsFiles()) {
     // for every file in the rules dir
     for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
       files.push({

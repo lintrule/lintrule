@@ -2,7 +2,7 @@ import {
   assertEquals,
   assertObjectMatch,
 } from "https://deno.land/std@0.117.0/testing/asserts.ts";
-import { parseDiff } from "./git.ts"; // Assuming the function is in this module
+import { parseDiffToHunks } from "./git.ts"; // Assuming the function is in this module
 
 Deno.test("parseDiff function", () => {
   const diff = `+++ file1.js
@@ -15,7 +15,7 @@ Deno.test("parseDiff function", () => {
     { file: "file2.js", x: 10, y: 5, z: 20, w: 7 },
   ];
 
-  const result = parseDiff(diff);
+  const result = parseDiffToHunks(diff);
 
   assertEquals(result, expected);
 });
@@ -26,7 +26,7 @@ Deno.test("parseDiff function", () => {
 
   const expected = [{ file: "file1.js", x: 64, y: 17, z: 82, w: 19 }];
 
-  const result = parseDiff(diff);
+  const result = parseDiffToHunks(diff);
 
   assertEquals(result, expected);
 });

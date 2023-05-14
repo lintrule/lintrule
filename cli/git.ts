@@ -1,4 +1,4 @@
-export function parseDiff(diff: string) {
+export function parseDiffToHunks(diff: string) {
   const lines = diff.split("\n");
   const hunks = [];
   let currentFile = "";
@@ -28,7 +28,33 @@ export function parseDiff(diff: string) {
   return hunks;
 }
 
-export async function* getChanges() {
+function parseDiffToFiles(diff: string) {
+  const diffParts = diff.split("diff --git");
+  const result = [];
+
+  for (const part of diffParts) {
+    if (part.trim() === "") continue;
+
+    const match = part.match(/ a\/(.*) b\/(.*)/);
+    if (!match) continue;
+
+    const filePath = match[1];
+
+    const diffContentStart = part.indexOf("---");
+    if (diffContentStart === -1) continue;
+
+    const diffContent = part.slice(diffContentStart);
+
+    result.push({
+      file: filePath,
+      diff: diffContent,
+    });
+  }
+
+  return result;
+}
+
+export async function getDiff() {
   const p = new Deno.Command("git", {
     args: ["diff", "HEAD^"],
     stdout: "piped",
@@ -42,7 +68,28 @@ export async function* getChanges() {
 
   const text = new TextDecoder().decode(stdout); // Convert the raw output into a string
 
-  const hunks = parseDiff(text);
+  return text;
+}
+
+export async function* getChangesAsFiles() {
+  const text = await getDiff();
+  const files = parseDiffToFiles(text);
+
+  for (const file of files) {
+    // Read the file
+    const p = await Deno.readFile(file.file);
+    const text = new TextDecoder().decode(p);
+
+    yield {
+      file: file.file,
+      snippet: text,
+    };
+  }
+}
+
+export async function* getChangesAsHunks() {
+  const text = await getDiff();
+  const hunks = parseDiffToHunks(text);
 
   for (const hunk of hunks) {
     // Read the file
