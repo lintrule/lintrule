@@ -5,6 +5,7 @@ import { readVersion } from "./version.ts";
 import { initCmd } from "./cmds/init.ts";
 import { estimateBillingCommand } from "./cmds/estimate-billing.ts";
 import { upgrade } from "./cmds/upgrade.ts";
+import { secretsCmd } from "./cmds/secrets.ts";
 
 const version = await readVersion();
 
@@ -32,6 +33,13 @@ const cmd: any = new Command()
   .command("estimate-billing", "Estimate your invoice for this repository")
   .action(() => estimateBillingCommand())
   .command("upgrade", "Upgrade lintrule to the latest version")
-  .action(() => upgrade());
+  .action(() => upgrade())
+  .command(
+    "secrets",
+    new Command()
+      .description("Manage secrets")
+      .command("list", "List all secrets")
+      .action(() => secretsCmd())
+  );
 
 await cmd.parse(Deno.args);
