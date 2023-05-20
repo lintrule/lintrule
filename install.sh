@@ -25,23 +25,15 @@ mkdir -p "${TARGET_DIR}"
 # Define the target file path for the 'rules' CLI binary.
 TARGET_FILE="${TARGET_DIR}/${BINARY_NAME}"
 
-# Use the GitHub API to get the latest release information.
-echo "Fetching the latest release information..."
-LATEST_RELEASE_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
-LATEST_RELEASE_JSON=$(curl -s "${LATEST_RELEASE_URL}")
-
 case $(uname -ms) in
 'Darwin x86_64')
-    target=darwin-x64
+    target=x86_64-apple-darwin
     ;;
 'Darwin arm64')
-    target=darwin-aarch64
-    ;;
-'Linux aarch64' | 'Linux arm64')
-    target=linux-aarch64
+    target=aarch64-apple-darwin
     ;;
 'Linux x86_64' | *)
-    target=linux-x64
+    target=x86_64-unknown-linux-gnu
     ;;
 esac
 
@@ -58,24 +50,10 @@ GITHUB=${GITHUB-"https://github.com"}
 
 github_repo="$GITHUB/$GITHUB_REPO"
 
-if [[ $target = darwin-x64 ]]; then
-    # If AVX2 isn't supported, use the -baseline build
-    if [[ $(sysctl -a | grep machdep.cpu | grep AVX2) == '' ]]; then
-        target=darwin-x64-baseline
-    fi
-fi
-
-if [[ $target = linux-x64 ]]; then
-    # If AVX2 isn't supported, use the -baseline build
-    if [[ $(cat /proc/cpuinfo | grep avx2) = '' ]]; then
-        target=linux-x64-baseline
-    fi
-fi
-
 if [[ $# = 0 ]]; then
-    RULES_BINARY_URL=$github_repo/releases/latest/download/bun-$target.zip
+    RULES_BINARY_URL=$github_repo/releases/latest/download/rules-$target
 else
-    RULES_BINARY_URL=$github_repo/releases/download/$1/bun-$target.zip
+    RULES_BINARY_URL=$github_repo/releases/download/$1/rules-$target
 fi
 
 # Check if the download URL was found.
