@@ -72,6 +72,7 @@ async function compileDistribution() {
         "--target",
         target,
         "--output",
+
         `dist/rules-${target}`,
         "cli/main.ts",
       ],
