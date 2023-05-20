@@ -4,10 +4,20 @@
 GITHUB_REPO="Flaque/lintrule"
 BINARY_NAME="rules"
 
-# Define the target directory where the 'rules' CLI binary will be installed.
-# You can use '/usr/.local/bin' as a common location that is sometimes 
-# in the user's PATH.
-TARGET_DIR="${HOME}/.local/bin"
+# Check the operating system
+OS="$(uname)"
+
+# If the operating system is Linux, set the target directory to '/usr/local/bin'
+# If the operating system is Darwin (macOS), set the target directory to '${HOME}/.local/bin'
+if [ "$OS" == "Linux" ]; then
+  TARGET_DIR="/usr/local/bin"
+elif [ "$OS" == "Darwin" ]; then
+  TARGET_DIR="${HOME}/.local/bin"
+else
+  echo "Unsupported operating system: $OS"
+  exit 1
+fi
+
 
 # Make sure the target dir exists
 mkdir -p "${TARGET_DIR}"
