@@ -22,6 +22,4 @@ jobs:
 
       - name: Run Lint Rules Check
         run: |
-          rules check
-        env:
-          LINTRULE_SECRET: ${{ secrets.LINTRULE_SECRET }}
+          LINTRULE_SECRET=${{ secrets.LINTRULE_SECRET }} rules check
