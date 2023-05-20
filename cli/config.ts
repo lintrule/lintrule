@@ -15,7 +15,7 @@ function getConfigPath() {
     case "windows":
       return join(Deno.env.get("APPDATA") || "", "lintrule", "config.json");
     case "darwin":
-      return join(Deno.env.get("HOME") || "", ".lintrule", "config.json");
+      return join(Deno.env.get("HOME") || "", ".config", "lintrule.json");
   }
 
   // Even though this is technically unreachable from the types
@@ -34,7 +34,13 @@ export async function readConfig(): Promise<Config> {
   const configPath = getConfigPath();
   try {
     const configText = await Deno.readTextFile(configPath);
-    return JSON.parse(configText);
+    const config = JSON.parse(configText);
+
+    const accessToken = Deno.env.get("LINTRULE_SECRET") || config.accessToken;
+    return {
+      ...config,
+      accessToken,
+    };
   } catch (_) {
     return {};
   }

@@ -33,7 +33,7 @@ async function checkRuleAgainstEntry(props: {
 
   if (result.pass) {
     console.log(
-      `${colors.bgGreen(
+      `${colors.bgBrightGreen(
         colors.brightWhite(" PASS ")
       )} ${relativeEntry} ${relativeRuleEntry}`
     );
@@ -46,9 +46,10 @@ async function checkRuleAgainstEntry(props: {
   }
 }
 
-export async function checkCmd(props: { host: string }) {
+export async function checkCmd(props: { host: string; secret?: string }) {
   const config = await readConfig();
-  if (!config.accessToken) {
+  const accessToken = props.secret || config.accessToken;
+  if (!accessToken) {
     console.log("Please run 'rules login' first.");
     Deno.exit(1);
   }
@@ -76,7 +77,7 @@ export async function checkCmd(props: { host: string }) {
         host: props.host,
         rulePath: file.rulePath,
         change: file.change,
-        accessToken: config.accessToken,
+        accessToken: accessToken,
       })
     );
   }
