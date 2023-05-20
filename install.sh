@@ -30,8 +30,53 @@ echo "Fetching the latest release information..."
 LATEST_RELEASE_URL="https://api.github.com/repos/${GITHUB_REPO}/releases/latest"
 LATEST_RELEASE_JSON=$(curl -s "${LATEST_RELEASE_URL}")
 
-# Extract the download URL for the 'rules' binary from the release information.
-RULES_BINARY_URL=$(echo "${LATEST_RELEASE_JSON}" | grep "\"browser_download_url\":" | grep "${BINARY_NAME}" | sed -n 's/.*"browser_download_url": "\(.*\)"/\1/p')
+case $(uname -ms) in
+'Darwin x86_64')
+    target=darwin-x64
+    ;;
+'Darwin arm64')
+    target=darwin-aarch64
+    ;;
+'Linux aarch64' | 'Linux arm64')
+    target=linux-aarch64
+    ;;
+'Linux x86_64' | *)
+    target=linux-x64
+    ;;
+esac
+
+if [[ $target = darwin-x64 ]]; then
+    # Is this process running in Rosetta?
+    # redirect stderr to devnull to avoid error message when not running in Rosetta
+    if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) = 1 ]]; then
+        target=darwin-aarch64
+        info "Your shell is running in Rosetta 2. Downloading rules for $target instead"
+    fi
+fi
+
+GITHUB=${GITHUB-"https://github.com"}
+
+github_repo="$GITHUB/$GITHUB_REPO"
+
+if [[ $target = darwin-x64 ]]; then
+    # If AVX2 isn't supported, use the -baseline build
+    if [[ $(sysctl -a | grep machdep.cpu | grep AVX2) == '' ]]; then
+        target=darwin-x64-baseline
+    fi
+fi
+
+if [[ $target = linux-x64 ]]; then
+    # If AVX2 isn't supported, use the -baseline build
+    if [[ $(cat /proc/cpuinfo | grep avx2) = '' ]]; then
+        target=linux-x64-baseline
+    fi
+fi
+
+if [[ $# = 0 ]]; then
+    RULES_BINARY_URL=$github_repo/releases/latest/download/bun-$target.zip
+else
+    RULES_BINARY_URL=$github_repo/releases/download/$1/bun-$target.zip
+fi
 
 # Check if the download URL was found.
 if [ -z "${RULES_BINARY_URL}" ]; then

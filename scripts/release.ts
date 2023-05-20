@@ -1,6 +1,7 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { readVersion } from "../cli/version.ts";
+import { join } from "https://deno.land/std@0.185.0/path/mod.ts";
 
 function logAndError(msg: string) {
   console.log(colors.bgRed(" Error "), colors.red(msg));
@@ -50,34 +51,48 @@ async function saveVersion(version: string) {
   await Deno.writeTextFile(cliJsonPath, JSON.stringify(cli, null, 2));
 }
 
+const COMPILE_TARGETS = [
+  "x86_64-unknown-linux-gnu", // x86 linux
+  "x86_64-pc-windows-msvc", // PCs
+  "x86_64-apple-darwin", // intel macs
+  "aarch64-apple-darwin", // m1 macs / arm
+];
+
 async function compileDistribution() {
-  const p = Deno.run({
-    cmd: [
-      "deno",
-      "compile",
-      "--output",
-      "dist/rules",
-      "--allow-read",
-      "--allow-write",
-      "--allow-env",
-      "--allow-net",
-      "--allow-run",
-      "cli/main.ts",
-    ],
-  });
-  const status = await p.status();
-  if (!status.success) {
-    logAndError("Failed to compile the distribution");
+  for (const target of COMPILE_TARGETS) {
+    const p = Deno.run({
+      cmd: [
+        "deno",
+        "compile",
+        "--allow-read",
+        "--allow-write",
+        "--allow-env",
+        "--allow-net",
+        "--allow-run",
+        "--target",
+        target,
+        "--output",
+        `dist/rules-${target}`,
+        "cli/main.ts",
+      ],
+    });
+    const status = await p.status();
+    if (!status.success) {
+      logAndError("Failed to compile the distribution");
+    }
   }
 }
 
 async function createRelease(version: string) {
+  const distFiles = [...Deno.readDirSync("./dist")].map(
+    (entry) => `./dist/${entry.name}`
+  );
   const cmds = [
     "gh",
     "release",
     "create",
     version,
-    "dist/rules",
+    ...distFiles,
     "--generate-notes",
   ];
 
