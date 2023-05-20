@@ -22,5 +22,4 @@ jobs:
 
       - name: Run Lint Rules Check
         run: |
-          export LINTRULE_SECRET=${{ secrets.LINTRULE_SECRET }}
-          rules check
+          LINTRULE_SECRET=${{ secrets.LINTRULE_SECRET }} rules check
