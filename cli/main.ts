@@ -18,8 +18,6 @@ const billingCommand: any = new Command()
 const secretsCommand: any = new Command()
   .description("Manage secrets")
   .action(() => secretsCommand.showHelp())
-  .command("list", "List all secrets")
-  .action(() => secretsListCmd())
   .command("create", "List all secrets")
   .option("--host [host]", "A specific api deployment of lintrule")
   .action((options) =>
