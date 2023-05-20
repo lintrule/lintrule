@@ -102,6 +102,8 @@ async function createRelease(version: string) {
     cmds.push("--prerelease");
   }
 
+  console.log(cmds.join(" "));
+
   const p = Deno.run({
     cmd: cmds,
   });
