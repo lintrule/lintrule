@@ -9,9 +9,9 @@ OS="$(uname)"
 
 # If the operating system is Linux, set the target directory to '/usr/local/bin'
 # If the operating system is Darwin (macOS), set the target directory to '${HOME}/.local/bin'
-if [ "$OS" == "Linux" ]; then
+if [[ "$OS" == "Linux" ]]; then
   TARGET_DIR="/usr/local/bin"
-elif [ "$OS" == "Darwin" ]; then
+elif [[ "$OS" == "Darwin" ]]; then
   TARGET_DIR="${HOME}/.local/bin"
 else
   echo "Unsupported operating system: $OS"
