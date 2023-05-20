@@ -45,17 +45,18 @@ if [ -f "${TARGET_FILE}" ]; then
     echo "The binary is located at '${TARGET_FILE}'."
 
     # Provide instructions for adding the target directory to the PATH.
-    echo ""
-    echo "To use the '${BINARY_NAME}' command, add '${TARGET_DIR}' to your PATH."
-    echo "You can do this by running one of the following commands, depending on your shell:"
-    echo ""
-    echo "For bash:"
-    echo "  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.bashrc && source ~/.bashrc"
-    echo ""
-    echo "For zsh:"
-    echo "  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.zshrc && source ~/.zshrc"
-    echo ""
-    echo "After running the appropriate command, you can use '${BINARY_NAME}'."
+    echo -e "\033[0;32m"
+    echo -e "To use the '${BINARY_NAME}' command, add '${TARGET_DIR}' to your PATH."
+    echo -e "You can do this by running one of the following commands, depending on your shell:"
+    echo -e "\033[0m"
+    echo -e "\033[0;32mFor bash:"
+    echo -e "\033[1m  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.bashrc && source ~/.bashrc\033[0m"
+    echo -e "\033[0;32m"
+    echo -e "\033[0;32mFor zsh:"
+    echo -e "\033[1m  echo 'export PATH=\"${TARGET_DIR}:\$PATH\"' >> ~/.zshrc && source ~/.zshrc\033[0m"
+    echo -e "\033[0;32m"
+    echo -e "After running the appropriate command, you can use '${BINARY_NAME}'.\033[0m"
+
 
 else
     echo "Installation failed. '${BINARY_NAME}' CLI could not be installed."
