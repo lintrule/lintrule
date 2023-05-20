@@ -22,4 +22,4 @@ jobs:
 
       - name: Run Lint Rules Check
         run: |
-          LINTRULE_SECRET=sk_e72bGDs78frumzyrgoh78 rules check
+          rules check --secret {{ secrets.LINTRULE_SECRET }}
