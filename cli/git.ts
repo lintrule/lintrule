@@ -56,7 +56,7 @@ function parseDiffToFiles(diff: string) {
 
 export async function getDiff() {
   const p = new Deno.Command("git", {
-    args: ["diff", "HEAD^"],
+    args: ["diff", "FETCH_HEAD^"],
     stdout: "piped",
   });
 
