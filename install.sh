@@ -18,6 +18,9 @@ else
   exit 1
 fi
 
+command -v unzip >/dev/null ||
+    error 'unzip is required to install lintrule'
+
 
 # Make sure the target dir exists
 mkdir -p "${TARGET_DIR}"
@@ -65,8 +68,11 @@ fi
 
 # Download the 'rules' CLI binary from the specified URL.
 echo "Downloading '${BINARY_NAME}' CLI binary..."
-echo "curl -L -o \"${TARGET_FILE}\" \"${RULES_BINARY_URL}\""
-curl -L -o "${TARGET_FILE}" "${RULES_BINARY_URL}"
+echo "curl -L -o \"${TARGET_FILE}.zip\" \"${RULES_BINARY_URL}\""
+curl -L -o "${TARGET_FILE}.zip" "${RULES_BINARY_URL}"
+
+unzip -oqd "$TARGET_FILE" "$TARGET_FILE.zip" ||
+    error 'Failed to extract rules'
 
 # Make the downloaded binary executable.
 chmod +x "${TARGET_FILE}"

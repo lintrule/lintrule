@@ -81,13 +81,32 @@ async function compileDistribution() {
     if (!status.success) {
       logAndError("Failed to compile the distribution");
     }
+
+    // Zip the binary
+    const zip = Deno.run({
+      cmd: [
+        "zip",
+        "-j",
+        `dist/rules-${target}.zip`,
+        `dist/rules-${target}`,
+        "cli/cli.json",
+      ],
+    });
+    const zipStatus = await zip.status();
+    if (!zipStatus.success) {
+      logAndError("Failed to zip the distribution");
+    }
   }
 }
 
 async function createRelease(version: string) {
-  const distFiles = [...Deno.readDirSync("./dist")].map(
-    (entry) => `./dist/${entry.name}`
-  );
+  // Only take the zip files
+  const distFiles = [...Deno.readDirSync("./dist")]
+    .filter((entry) => entry.isFile)
+    .filter((entry) => entry.name.endsWith(".zip"))
+    .map((entry) => `./dist/${entry.name}`);
+
+  console.log(distFiles);
   const cmds = [
     "gh",
     "release",
