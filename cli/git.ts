@@ -64,9 +64,8 @@ export async function getDiffInGithubAction() {
     throw new Error("GITHUB_REF is not defined");
   }
 
-  console.log("git diff", `${sha}..${ref}`);
   const p = new Deno.Command("git", {
-    args: ["diff", `${sha}..main`],
+    args: ["diff", `${sha}..${ref}^`],
     stdout: "piped",
   });
 
