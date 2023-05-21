@@ -54,9 +54,40 @@ function parseDiffToFiles(diff: string) {
   return result;
 }
 
-export async function getDiff() {
+export async function getDiffInGithubAction() {
+  const sha = Deno.env.get("GITHUB_SHA");
+  if (!sha) {
+    throw new Error("GITHUB_SHA is not defined");
+  }
+  const ref = Deno.env.get("GITHUB_REF");
+  if (!ref) {
+    throw new Error("GITHUB_REF is not defined");
+  }
+
   const p = new Deno.Command("git", {
-    args: ["diff", "FETCH_HEAD^"],
+    args: ["diff", `${sha}..${ref}`],
+    stdout: "piped",
+  });
+
+  const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
+
+  if (code !== 0) {
+    throw new Error(new TextDecoder().decode(stderr));
+  }
+
+  const text = new TextDecoder().decode(stdout); // Convert the raw output into a string
+
+  return text;
+}
+
+export async function getDiff() {
+  // If we're in a github action, use the github action diff
+  if (Deno.env.get("GITHUB_SHA")) {
+    return getDiffInGithubAction();
+  }
+
+  const p = new Deno.Command("git", {
+    args: ["diff", "HEAD^"],
     stdout: "piped",
   });
 
