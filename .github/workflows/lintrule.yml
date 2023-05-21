@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  rules:
     runs-on: ubuntu-latest
 
     steps:
