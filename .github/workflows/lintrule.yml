@@ -18,8 +18,7 @@ jobs:
         
       - name: Git diff
         run: |
-          git fetch origin ${{ github.base_ref }}
-          git diff --color FETCH_HEAD...
+          git diff $GITHUB_HEAD_REF..$GITHUB_BASE_REF
 
       - name: Install Lint Rules
         run: |
