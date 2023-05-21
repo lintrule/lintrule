@@ -1,3 +1,5 @@
+import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
+
 export function parseDiffToHunks(diff: string) {
   const lines = diff.split("\n");
   const hunks = [];
@@ -69,6 +71,7 @@ export async function getDiffInGithubAction() {
     stdout: "piped",
   });
 
+  console.log(colors.dim(`\n$ git diff ${sha}..${ref}`));
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
   if (code !== 0) {
@@ -104,6 +107,7 @@ export async function getDiff() {
 
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
+  console.log(colors.dim(`\n$ git diff HEAD^`));
   if (code !== 0) {
     throw new Error(new TextDecoder().decode(stderr));
   }

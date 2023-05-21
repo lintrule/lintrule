@@ -85,7 +85,7 @@ ${colors.bold("Length:")}: ${accessToken.length}`
     throw new Error("Too many files to check at once. Please check less files");
   }
 
-  console.log(colors.dim(`\nChecking ${files.length} files in parallel...\n`));
+  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
 
   const now = Date.now();
   const promises = [];
