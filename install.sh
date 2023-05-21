@@ -54,9 +54,9 @@ GITHUB=${GITHUB-"https://github.com"}
 github_repo="$GITHUB/$GITHUB_REPO"
 
 if [[ $# = 0 ]]; then
-    RULES_BINARY_URL=$github_repo/releases/latest/download/rules-$target
+    RULES_BINARY_URL=$github_repo/releases/latest/download/rules-$target.zip
 else
-    RULES_BINARY_URL=$github_repo/releases/download/$1/rules-$target
+    RULES_BINARY_URL=$github_repo/releases/download/$1/rules-$target.zip
 fi
 
 # Check if the download URL was found.
@@ -71,8 +71,13 @@ echo "Downloading '${BINARY_NAME}' CLI binary..."
 echo "curl -L -o \"${TARGET_FILE}.zip\" \"${RULES_BINARY_URL}\""
 curl -L -o "${TARGET_FILE}.zip" "${RULES_BINARY_URL}"
 
-unzip -oqd "$TARGET_FILE" "$TARGET_FILE.zip" ||
+echo "unzip -o \"${TARGET_FILE}.zip\" -d \"${TARGET_DIR}/dist\""
+unzip -o "$TARGET_FILE.zip" -d "$TARGET_DIR/dist" ||
     error 'Failed to extract rules'
+
+# rename the binary to 'rules'
+mv "$TARGET_DIR/dist/rules-$target" "$TARGET_DIR/$BINARY_NAME"
+
 
 # Make the downloaded binary executable.
 chmod +x "${TARGET_FILE}"

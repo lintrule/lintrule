@@ -4,7 +4,7 @@ import { walkTextFiles } from "../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../config.ts";
-import { getChangesAsFiles, getChangesAsHunks } from "../git.ts";
+import { getChangesAsFiles } from "../git.ts";
 
 const rootDir = await findRoot();
 
