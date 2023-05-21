@@ -39,6 +39,7 @@ async function checkRuleAgainstEntry(props: {
         "=>"
       )} ${relativeEntry} ${colors.dim(`(${totalTime}ms)`)}`
     );
+    return true;
   } else {
     console.log(
       `  ${colors.bgRed(
@@ -47,6 +48,7 @@ async function checkRuleAgainstEntry(props: {
         `(${totalTime}ms)`
       )}`
     );
+    return false;
   }
 }
 
@@ -98,6 +100,11 @@ ${colors.bold("Length:")}: ${accessToken.length}`
     );
   }
 
-  await Promise.all(promises);
+  const results = await Promise.all(promises);
+  const failed = results.filter((r) => !r);
+  if (failed.length > 0) {
+    console.log(colors.bgRed(`  ${failed.length} rules failed. `));
+    Deno.exit(1);
+  }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
 }
