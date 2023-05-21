@@ -72,7 +72,18 @@ export async function getDiffInGithubAction() {
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
   if (code !== 0) {
-    throw new Error(new TextDecoder().decode(stderr));
+    const err = new TextDecoder().decode(stderr);
+    if (err.includes("fatal: ambiguous argument")) {
+      console.error(`rules can't find previous code to compare against. Try checking that your checkout step has 'fetch-depth' of 2 or higher. For example:
+
+- uses: actions/checkout@v2
+  with:
+    fetch-depth: 2
+
+    `);
+    }
+
+    throw new Error(err);
   }
 
   const text = new TextDecoder().decode(stdout); // Convert the raw output into a string
