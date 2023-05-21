@@ -57,6 +57,15 @@ export async function checkCmd(props: { host: string; secret?: string }) {
     console.log("Please run 'rules login' first.");
     Deno.exit(1);
   }
+  if (!accessToken.startsWith("sk_")) {
+    console.log(
+      `Lintrule secret does not start with 'sk_'. Here's some details about it:
+
+${colors.bold("Ends with:")}: ${accessToken.slice(-3)}
+${colors.bold("Length:")}: ${accessToken.length}`
+    );
+    Deno.exit(1);
+  }
 
   const files = [];
   for await (const change of getChangesAsFiles()) {
