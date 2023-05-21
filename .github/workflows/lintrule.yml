@@ -28,4 +28,4 @@ jobs:
 
       - name: Run Lint Rules Check
         run: |
-          rules check --secret sk_THl-cEjW-iwNhh-Ias5jf
+          rules check --secret {{ secrets.LINTRULE_SECRET }}
