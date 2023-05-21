@@ -31,7 +31,9 @@ async function sendRule({
   });
 
   if (res.status === 401) {
-    throw new Error("Please login again!");
+    throw new Error(
+      "Your access token is unauthorized! Consider logging in again or using a different secret."
+    );
   }
 
   // Payment required

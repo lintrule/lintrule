@@ -42,7 +42,10 @@ export async function readConfig(): Promise<Config> {
       accessToken,
     };
   } catch (_) {
-    return {};
+    const accessToken = Deno.env.get("LINTRULE_SECRET");
+    return {
+      accessToken,
+    };
   }
 }
 
