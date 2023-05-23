@@ -30,7 +30,7 @@ export function parseDiffToHunks(diff: string) {
   return hunks;
 }
 
-function parseDiffToFiles(diff: string) {
+export function parseDiffToFiles(diff: string) {
   const diffParts = diff.split("diff --git");
   const result = [];
 
@@ -43,7 +43,15 @@ function parseDiffToFiles(diff: string) {
     const filePath = match[1];
 
     const diffContentStart = part.indexOf("---");
-    if (diffContentStart === -1) continue;
+    const nextLineStart = part.indexOf("+++");
+    if (diffContentStart === -1 || nextLineStart === -1) continue;
+
+    // Ignore if the file is deleted (next line is +++ /dev/null)
+    const nextLine = part.slice(
+      nextLineStart,
+      part.indexOf("\n", nextLineStart)
+    );
+    if (nextLine.trim() === "+++ /dev/null") continue;
 
     const diffContent = part.slice(diffContentStart);
 
