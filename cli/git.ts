@@ -74,6 +74,9 @@ export async function getDiffInGithubActionPullRequest() {
     throw new Error("GITHUB_BASE_REF is not defined");
   }
 
+  await gitFetch(head);
+  await gitFetch(ref);
+
   const p = new Deno.Command("git", {
     args: ["diff", `${head}..${ref}^`],
     stdout: "piped",
@@ -103,6 +106,18 @@ export async function getDiffInGithubActionPullRequest() {
   return text;
 }
 
+export async function gitFetch(ref: string) {
+  const p = new Deno.Command("git", {
+    args: ["fetch", `origin`, `${ref}`],
+    stdout: "piped",
+  });
+
+  const { code } = await p.output();
+  if (code !== 0) {
+    throw new Error("git fetch failed");
+  }
+}
+
 export async function getDiffInGithubAction() {
   const head = Deno.env.get("GITHUB_SHA");
   if (!head) {
@@ -112,6 +127,9 @@ export async function getDiffInGithubAction() {
   if (!ref) {
     throw new Error("GITHUB_REF is not defined");
   }
+
+  await gitFetch(head);
+  await gitFetch(ref);
 
   const p = new Deno.Command("git", {
     args: ["diff", `${head}..${ref}^`],
