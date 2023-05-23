@@ -5,6 +5,8 @@ import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../config.ts";
 import { getChangesAsFiles } from "../git.ts";
+import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
+import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 
 const rootDir = await findRoot();
 
@@ -70,9 +72,24 @@ ${colors.bold("Length:")}: ${accessToken.length}`
   }
 
   const files = [];
-  for await (const change of getChangesAsFiles()) {
-    // for every file in the rules dir
-    for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
+  for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
+    const file = await Deno.readTextFile(ruleEntry.path);
+    const result: { data?: { include?: string[] }; content: string } =
+      frontmatter.parse(file) as any;
+
+    for await (const change of getChangesAsFiles()) {
+      if (result.data?.include) {
+        const include = result.data.include;
+        if (!Array.isArray(include)) {
+          throw new Error("Include must be an array");
+        }
+        const includeRegexes = include.map((i) => globToRegExp(i));
+        const shouldInclude = includeRegexes.some((r) => r.test(change.file));
+        if (!shouldInclude) {
+          continue;
+        }
+      }
+
       files.push({
         change,
         rulePath: ruleEntry.path,
