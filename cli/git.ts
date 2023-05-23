@@ -108,7 +108,7 @@ export async function getDiffInGithubActionPullRequest() {
 
 export async function gitFetch(ref: string) {
   const p = new Deno.Command("git", {
-    args: ["fetch", `origin`, `${ref}`],
+    args: ["fetch", `origin`, `${ref}:${ref}`],
     stdout: "piped",
   });
 
