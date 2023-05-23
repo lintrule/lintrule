@@ -20,7 +20,7 @@ jobs:
           
       - name: git diff
         run: |
-          git diff prs..main^
+          git diff $GITHUB_HEAD_REF..$GITHUB_SHA^
 
       - name: Install Lint Rules
         run: |
