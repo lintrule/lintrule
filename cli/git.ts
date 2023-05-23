@@ -64,7 +64,7 @@ export function parseDiffToFiles(diff: string) {
   return result;
 }
 
-export async function getDiffInGithubAction() {
+export async function getDiffInGithubActionPullRequest() {
   const sha = Deno.env.get("GITHUB_SHA");
   if (!sha) {
     throw new Error("GITHUB_SHA is not defined");
@@ -80,6 +80,24 @@ export async function getDiffInGithubAction() {
   });
 
   console.log(colors.dim(`\n$ git diff ${sha}..${ref}`));
+}
+
+export async function getDiffInGithubAction() {
+  const head = Deno.env.get("GITHUB_HEAD_REF");
+  if (!head) {
+    throw new Error("GITHUB_HEAD_REF is not defined");
+  }
+  const ref = Deno.env.get("GITHUB_BASE_REF");
+  if (!ref) {
+    throw new Error("GITHUB_BASE_REF is not defined");
+  }
+
+  const p = new Deno.Command("git", {
+    args: ["diff", `${head}..${ref}^`],
+    stdout: "piped",
+  });
+
+  console.log(colors.dim(`\n$ git diff ${head}..${ref}`));
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
   if (code !== 0) {
@@ -103,6 +121,11 @@ export async function getDiffInGithubAction() {
 }
 
 export async function getDiff() {
+  // If we're in a github action inside a PR, use that diff
+  if (Deno.env.get("GITHUB_HEAD_REF")) {
+    return getDiffInGithubActionPullRequest();
+  }
+
   // If we're in a github action, use the github action diff
   if (Deno.env.get("GITHUB_SHA")) {
     return getDiffInGithubAction();
