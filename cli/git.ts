@@ -148,7 +148,7 @@ export async function getDiff() {
   }
 
   // If we're in a github action, use the github action diff
-  if (Deno.env.get("GITHUB_SHA")) {
+  if (Deno.env.get("GITHUB_BASE_REF")) {
     return getDiffInGithubAction();
   }
 
