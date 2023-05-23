@@ -16,11 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
-        
-      - name: Git diff
-        run: |
-          git diff $GITHUB_SHA..$GITHUB_REF
+          fetch-depth: 0
 
       - name: Install Lint Rules
         run: |
