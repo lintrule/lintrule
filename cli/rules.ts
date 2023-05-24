@@ -40,7 +40,9 @@ async function sendRule({
 
   // Payment required
   if (res.status === 402) {
-    throw new Error("Please setup your billing details!");
+    throw new Error(
+      "Please setup your billing details! Please run `rules login` to setup your billing details."
+    );
   }
 
   if (retries > 0) {
