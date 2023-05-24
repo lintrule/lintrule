@@ -2,4 +2,7 @@
 include: ["**/**.ts"]
 ---
 
-In my Deno project, avoid obvious syntax errors and other bugs
+Fail if you see obvious instances of:
+
+- infinite loops
+- syntax errors

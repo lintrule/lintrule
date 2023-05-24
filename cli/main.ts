@@ -41,10 +41,15 @@ const cmd: any = new Command()
     "--secret [secret]",
     "A secret. You can also use the LINTRULE_SECRET environment variable"
   )
+  .option(
+    "--diff [diff]",
+    "Run rules only on changes between two files. Ex: 'HEAD^' or 'main..feature'"
+  )
   .action((options, ..._args) =>
     checkCmd({
       host: options.host?.toString() || "https://lintrule.com",
       secret: options.secret?.toString(),
+      diff: options.diff?.toString(),
     })
   )
   .command("login", "Login to lintrule")

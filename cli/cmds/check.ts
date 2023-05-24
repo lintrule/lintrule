@@ -54,7 +54,11 @@ async function checkRuleAgainstEntry(props: {
   }
 }
 
-export async function checkCmd(props: { host: string; secret?: string }) {
+export async function checkCmd(props: {
+  host: string;
+  secret?: string;
+  diff?: string;
+}) {
   const config = await readConfig();
   const accessToken = props.secret || config.accessToken;
   if (!accessToken) {
@@ -77,7 +81,7 @@ ${colors.bold("Length:")}: ${accessToken.length}`
     const result: { data?: { include?: string[] }; content: string } =
       frontmatter.parse(file) as any;
 
-    for await (const change of getChangesAsFiles()) {
+    for await (const change of getChangesAsFiles(props.diff)) {
       if (result.data?.include) {
         const include = result.data.include;
         if (!Array.isArray(include)) {

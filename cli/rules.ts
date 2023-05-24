@@ -13,10 +13,12 @@ async function sendRule({
   url,
   accessToken,
   documentRule,
+  retries = 1,
 }: {
   url: string;
   accessToken: string;
   documentRule: DocumentRule;
+  retries: number;
 }): Promise<DocumentRuleResponse> {
   // Create a headers object with the content type
   const headers = new Headers();
@@ -39,6 +41,19 @@ async function sendRule({
   // Payment required
   if (res.status === 402) {
     throw new Error("Please setup your billing details!");
+  }
+
+  if (retries > 0) {
+    if (res.status >= 500 || res.status === 429) {
+      // retry after 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return sendRule({
+        url,
+        accessToken,
+        documentRule,
+        retries: retries - 1,
+      });
+    }
   }
 
   // Check if the response is ok
@@ -79,6 +94,7 @@ export async function check({
       document: change.snippet,
       rule: rule.trim(),
     },
+    retries: 2,
   });
 
   return body;

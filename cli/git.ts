@@ -159,7 +159,29 @@ export async function getDiffInGithubAction() {
   return text;
 }
 
-export async function getDiff() {
+export async function getSpecificDiff(diff: string) {
+  const p = new Deno.Command("git", {
+    args: ["diff", diff],
+    stdout: "piped",
+  });
+
+  const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
+
+  console.log(colors.dim(`\n$ git diff ${diff}`));
+  if (code !== 0) {
+    throw new Error(new TextDecoder().decode(stderr));
+  }
+
+  const text = new TextDecoder().decode(stdout); // Convert the raw output into a string
+
+  return text;
+}
+
+export async function getDiff(diff?: string) {
+  if (diff) {
+    return getSpecificDiff(diff);
+  }
+
   // If we're in a github action inside a PR, use that diff
   if (Deno.env.get("GITHUB_HEAD_REF")) {
     return getDiffInGithubActionPullRequest();
@@ -187,8 +209,8 @@ export async function getDiff() {
   return text;
 }
 
-export async function* getChangesAsFiles() {
-  const text = await getDiff();
+export async function* getChangesAsFiles(diff?: string) {
+  const text = await getDiff(diff);
   const files = parseDiffToFiles(text);
 
   for (const file of files) {
