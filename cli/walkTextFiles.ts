@@ -80,8 +80,8 @@ export async function* walkTextFiles(
       continue;
     }
 
-    // 15kb is roughly 3500 tokens, which is a good limit for the moment.
-    if (await isTooBig(entry.path, 15)) {
+    // This doesn't look like a code file!
+    if (await isTooBig(entry.path, 100)) {
       console.warn("Skipping file because it is too big:", entry.path);
       continue;
     }
