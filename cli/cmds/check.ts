@@ -35,6 +35,17 @@ async function checkRuleAgainstEntry(props: {
   const relativeEntry = relative(root, props.change.file);
   const relativeRuleEntry = relative(root, props.rulePath);
 
+  if (result.skipped) {
+    console.log(
+      `  ${colors.bgYellow(" ⚠️ SKIP ")} ${relativeEntry} ${colors.dim(
+        "=>"
+      )} ${relativeRuleEntry}\nThe diff is too big to check :( ${colors.dim(
+        `(${totalTime}ms)`
+      )}`
+    );
+    return true;
+  }
+
   if (result.pass) {
     console.log(
       `  ${colors.bgBrightGreen(" ✔️ PASS ")} ${relativeRuleEntry} ${colors.dim(

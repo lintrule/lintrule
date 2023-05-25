@@ -6,7 +6,16 @@ export interface DocumentRule {
 
 export interface DocumentRuleResponse {
   pass: boolean;
+  skipped?: {
+    reason: "context_too_big";
+  };
   message?: string;
+}
+
+export interface ErrorResponse {
+  object: "error";
+  type: string;
+  message: string;
 }
 
 async function sendRule({
@@ -43,6 +52,20 @@ async function sendRule({
     throw new Error(
       "Please setup your billing details! Please run `rules login` to setup your billing details."
     );
+  }
+
+  // Check for 'context_too_big'
+  if (res.status === 400) {
+    const body = await res.json();
+
+    if (body.type === "context_too_big") {
+      return {
+        pass: false,
+        skipped: {
+          reason: "context_too_big",
+        },
+      };
+    }
   }
 
   if (retries > 0) {
