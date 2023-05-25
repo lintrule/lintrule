@@ -82,6 +82,12 @@ mv "$TARGET_DIR/dist/rules-$target" "$TARGET_DIR/$BINARY_NAME"
 # Make the downloaded binary executable.
 chmod +x "${TARGET_FILE}"
 
+# remove the dist directory
+rm -rf "$TARGET_DIR/dist"
+
+# remove the downloaded zip file
+rm "$TARGET_FILE.zip"
+
 
 # Verify that the 'rules' CLI binary is successfully installed.
 if [ -f "${TARGET_FILE}" ]; then
