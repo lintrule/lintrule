@@ -6,13 +6,16 @@ import {
 import ignore from "./ignore.js";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 
-async function isTooLong(filePath: string, kbs: number): Promise<boolean> {
+async function isTooBig(filePath: string, kbs: number): Promise<boolean> {
   const data = await Deno.readFile(filePath);
 
   return data.length > 1024 * kbs;
 }
 
 export const ignoredPatterns = [
+  "package-lock.json", // ignore package-lock.json
+  "yarn.lock", // ignore yarn.lock
+  "node_modules", // ignore node_modules
   "*.lock", // ignore lock files
   "*.log", // ignore log files
   "*.jpeg", // ignore jpegs
@@ -77,7 +80,8 @@ export async function* walkTextFiles(
       continue;
     }
 
-    if (await isTooLong(entry.path, 40)) {
+    // 15kb is roughly 3500 tokens, which is a good limit for the moment.
+    if (await isTooBig(entry.path, 15)) {
       console.warn("Skipping file because it is too big:", entry.path);
       continue;
     }
