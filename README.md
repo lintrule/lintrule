@@ -88,7 +88,7 @@ jobs:
 
 You can ensure rules only run on certain files by adding them to the frontmatter, like this:
 
-```
+```markdown
 ---
 include: ["**/**.sql"]
 ---
