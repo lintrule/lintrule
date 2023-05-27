@@ -1,10 +1,10 @@
-import { findRoot } from "../findRoot.ts";
-import { check } from "../rules.ts";
-import { walkTextFiles } from "../walkTextFiles.ts";
+import { findRoot } from "../../findRoot.ts";
+import { check } from "./rules.ts";
+import { walkTextFiles } from "../../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
-import { readConfig } from "../config.ts";
-import { getChangesAsFiles } from "../git.ts";
+import { readConfig } from "../../config.ts";
+import { getChangesAsFiles } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 

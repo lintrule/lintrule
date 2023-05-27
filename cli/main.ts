@@ -1,6 +1,6 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import { loginCmd } from "./cmds/login.ts";
-import { checkCmd } from "./cmds/check.ts";
+import { checkCmd } from "./cmds/check/cmd.ts";
 import { getLocalVersion, getRemoteVersion } from "./version.ts";
 import { initCmd } from "./cmds/init.ts";
 import { estimateBillingCommand } from "./cmds/estimate-billing.ts";

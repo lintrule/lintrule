@@ -5,6 +5,7 @@ export interface DocumentRule {
 }
 
 export interface DocumentRuleResponse {
+  object: "check_response";
   pass: boolean;
   skipped?: {
     reason: "context_too_big";
@@ -18,7 +19,7 @@ export interface ErrorResponse {
   message: string;
 }
 
-async function sendRule({
+export async function sendRule({
   url,
   accessToken,
   documentRule,
@@ -60,6 +61,7 @@ async function sendRule({
 
     if (body.type === "context_too_big") {
       return {
+        object: "check_response",
         pass: false,
         skipped: {
           reason: "context_too_big",
@@ -89,7 +91,9 @@ async function sendRule({
   // Read the response body into a DocumentRuleResponse object
   const body: DocumentRuleResponse = await res.json();
 
-  return body;
+  return {
+    ...body,
+  };
 }
 
 export async function check({
