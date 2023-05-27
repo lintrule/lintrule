@@ -7,6 +7,8 @@ import { readConfig } from "../../config.ts";
 import { getChangesAsFiles } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
+import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
+import { join } from "https://deno.land/std@0.185.0/path/win32.ts";
 
 const rootDir = await findRoot();
 
@@ -226,23 +228,41 @@ async function checkMessageAgainstDiff(props: {
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
 }
 
+async function existsAndIsFile(path: string) {
+  const exist = await exists(path);
+  if (!exist) return false;
+  const stat = await Deno.stat(path);
+  return stat.isFile;
+}
+
 async function checkMessageAgainstFiles(props: {
   host: string;
   accessToken: string;
   diff?: string;
   message: string;
-  root: string;
+  files: string;
 }) {
   const files = [];
-  const root = props.root || Deno.cwd();
-  for await (const file of walkTextFiles(root, gitignorePath)) {
-    const txt = await Deno.readTextFile(file.path);
 
+  // Check if 'root' is a file
+  if (await existsAndIsFile(props.files)) {
+    const txt = await Deno.readTextFile(props.files);
     files.push({
-      filePath: file.path,
+      filePath: root,
       document: txt,
       message: props.message,
     });
+  } else {
+    const root = props.files || Deno.cwd();
+    for await (const file of walkTextFiles(root, gitignorePath)) {
+      const txt = await Deno.readTextFile(file.path);
+
+      files.push({
+        filePath: file.path,
+        document: txt,
+        message: props.message,
+      });
+    }
   }
 
   // Hard limit of 100 files, to avoid runaway scripts
@@ -324,7 +344,7 @@ ${colors.bold("Length:")}: ${accessToken.length}`
       host: props.host,
       accessToken: accessToken,
       message: props.message,
-      root: props.files,
+      files: props.files,
     });
   }
 
