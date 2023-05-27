@@ -8,7 +8,6 @@ import { getChangesAsFiles } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
-import { join } from "https://deno.land/std@0.185.0/path/win32.ts";
 
 const rootDir = await findRoot();
 
