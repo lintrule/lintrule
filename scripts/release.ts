@@ -181,6 +181,9 @@ await new Command()
       );
       return;
     }
+    // Remove the dist folder
+    await Deno.remove("dist", { recursive: true });
+
     const version = await getLocalVersion();
     const bumped = bumpedVersion(version, type);
     await saveVersion(bumped);
