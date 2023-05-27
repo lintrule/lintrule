@@ -1,13 +1,32 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import { loginCmd } from "./cmds/login.ts";
 import { checkCmd } from "./cmds/check.ts";
-import { readVersion } from "./version.ts";
+import { getLocalVersion, getRemoteVersion } from "./version.ts";
 import { initCmd } from "./cmds/init.ts";
 import { estimateBillingCommand } from "./cmds/estimate-billing.ts";
 import { upgrade } from "./cmds/upgrade.ts";
-import { secretsCreateCmd, secretsListCmd } from "./cmds/secrets.ts";
+import { secretsCreateCmd } from "./cmds/secrets.ts";
+import * as semver from "https://deno.land/x/semver/mod.ts";
+import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 
-const version = await readVersion();
+const remoteVersionPromise = getRemoteVersion();
+const localVersionPromise = getLocalVersion();
+const [remoteVersion, localVersion] = await Promise.all([
+  remoteVersionPromise,
+  localVersionPromise,
+]);
+
+if (semver.gt(remoteVersion, localVersion)) {
+  console.log(
+    colors.green(`
+There's a new version of Lintrule available! (v${remoteVersion})
+
+    ┌──────────────────────┐
+    │ Run 'rules upgrade'  │
+    └──────────────────────┘
+`)
+  );
+}
 
 const billingCommand: any = new Command()
   .description("Manage billing")
@@ -28,7 +47,7 @@ const secretsCommand: any = new Command()
 
 const cmd: any = new Command()
   .name("rules")
-  .version(version)
+  .version(localVersion)
   .description("The plain language test framework")
   .action(() => cmd.showHelp())
   .command("init", "Add a rules folder with a demo rule")
