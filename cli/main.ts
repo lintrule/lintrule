@@ -56,7 +56,7 @@ const cmd: any = new Command()
   .action(() => upgrade())
   .command("check", "Check this repository against all rules")
   .option("--m [message]", "A one-off rule to check.")
-  .option("--files [root]", "If set, run on files instead of diffs")
+  .option("--files [path]", "If set, run on files instead of diffs")
   .option("--host [host]", "A specific api deployment of lintrule")
   .option(
     "--secret [secret]",
