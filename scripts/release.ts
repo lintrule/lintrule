@@ -1,6 +1,6 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.7/command/mod.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
-import { readVersion } from "../cli/version.ts";
+import { getLocalVersion } from "../cli/version.ts";
 
 function logAndError(msg: string) {
   console.log(colors.bgRed(" Error "), colors.red(msg));
@@ -181,7 +181,7 @@ await new Command()
       );
       return;
     }
-    const version = await readVersion();
+    const version = await getLocalVersion();
     const bumped = bumpedVersion(version, type);
     await saveVersion(bumped);
     await compileDistribution();
