@@ -40,7 +40,7 @@ export function parseDiffToFiles(diff: string) {
     const match = part.match(/ a\/(.*) b\/(.*)/);
     if (!match) continue;
 
-    const filePath = match[1];
+    const filePath = match[match.length - 1];
 
     const diffContentStart = part.indexOf("---");
     const nextLineStart = part.indexOf("+++");
