@@ -65,26 +65,12 @@ async function checkRuleAgainstEntry(props: {
   }
 }
 
-export async function checkCmd(props: {
+export async function checkRulesAgainstDiff(props: {
   host: string;
-  secret?: string;
+  accessToken: string;
   diff?: string;
 }) {
-  const config = await readConfig();
-  const accessToken = props.secret || config.accessToken;
-  if (!accessToken) {
-    console.log("Please run 'rules login' first.");
-    Deno.exit(1);
-  }
-  if (!accessToken.startsWith("sk_")) {
-    console.log(
-      `Lintrule secret does not start with 'sk_'. Here's some details about it:
-
-${colors.bold("Ends with:")}: ${accessToken.slice(-3)}
-${colors.bold("Length:")}: ${accessToken.length}`
-    );
-    Deno.exit(1);
-  }
+  const accessToken = props.accessToken;
 
   const files = [];
   for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
@@ -139,4 +125,37 @@ ${colors.bold("Length:")}: ${accessToken.length}`
     Deno.exit(1);
   }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+export async function checkCmd(props: {
+  host: string;
+  secret?: string;
+  diff?: string;
+  message?: string;
+}) {
+  const config = await readConfig();
+  const accessToken = props.secret || config.accessToken;
+  if (!accessToken) {
+    console.log("Please run 'rules login' first.");
+    Deno.exit(1);
+  }
+  if (!accessToken.startsWith("sk_")) {
+    console.log(
+      `Lintrule secret does not start with 'sk_'. Here's some details about it:
+
+${colors.bold("Ends with:")}: ${accessToken.slice(-3)}
+${colors.bold("Length:")}: ${accessToken.length}`
+    );
+    Deno.exit(1);
+  }
+
+  if (props.message) {
+    throw new Error("Not implemented yet");
+  }
+
+  return checkRulesAgainstDiff({
+    host: props.host,
+    accessToken: accessToken,
+    diff: props.diff,
+  });
 }
