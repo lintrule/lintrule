@@ -5,6 +5,7 @@ import {
 } from "https://deno.land/std@0.115.0/fs/mod.ts";
 import ignore from "./ignore.js";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
+import * as colors from "https://deno.land/std/fmt/colors.ts";
 
 async function isTooBig(filePath: string, kbs: number): Promise<boolean> {
   const data = await Deno.readFile(filePath);
@@ -16,6 +17,7 @@ export const ignoredPatterns = [
   "package-lock.json", // ignore package-lock.json
   "yarn.lock", // ignore yarn.lock
   "node_modules", // ignore node_modules
+  ".*", // ignore dot files
   "*.lock", // ignore lock files
   "*.log", // ignore log files
   "*.jpeg", // ignore jpegs
@@ -82,7 +84,9 @@ export async function* walkTextFiles(
 
     // This doesn't look like a code file!
     if (await isTooBig(entry.path, 100)) {
-      console.warn("Skipping file because it is too big:", entry.path);
+      console.warn(
+        colors.red(`Skipping file because it is too big: ${entry.path}`)
+      );
       continue;
     }
 

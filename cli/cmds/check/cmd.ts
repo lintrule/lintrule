@@ -7,6 +7,7 @@ import { readConfig } from "../../config.ts";
 import { getChangesAsFiles } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
+import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
 
 const rootDir = await findRoot();
 
@@ -14,7 +15,7 @@ const root = rootDir || Deno.cwd();
 const rulesDir = `${root}/rules`;
 const gitignorePath = ".gitignore";
 
-async function checkAndLogRuleFileAgainstDiff(props: {
+async function checkAndLogRuleFileAgainst(props: {
   rulePath: string;
   change: {
     file: string;
@@ -66,7 +67,7 @@ async function checkAndLogRuleFileAgainstDiff(props: {
   }
 }
 
-async function checkAndLogMessageAgainstDiff(props: {
+async function checkAndLogMessageAgainstFileAndSnippet(props: {
   message: string;
   change: {
     file: string;
@@ -166,7 +167,7 @@ export async function checkRulesAgainstDiff(props: {
   const promises = [];
   for (const file of files) {
     promises.push(
-      checkAndLogRuleFileAgainstDiff({
+      checkAndLogRuleFileAgainst({
         host: props.host,
         rulePath: file.rulePath,
         change: file.change,
@@ -209,10 +210,165 @@ async function checkMessageAgainstDiff(props: {
   const promises = [];
   for (const file of files) {
     promises.push(
-      checkAndLogMessageAgainstDiff({
+      checkAndLogMessageAgainstFileAndSnippet({
         host: props.host,
         message: file.message,
         change: file.change,
+        accessToken: props.accessToken,
+      })
+    );
+  }
+  const results = await Promise.all(promises);
+  const failed = results.filter((r) => !r);
+  if (failed.length > 0) {
+    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    Deno.exit(1);
+  }
+  console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+async function existsAndIsFile(path: string) {
+  const exist = await exists(path);
+  if (!exist) return false;
+  const stat = await Deno.stat(path);
+  return stat.isFile;
+}
+
+async function checkMessageAgainstFiles(props: {
+  host: string;
+  accessToken: string;
+  diff?: string;
+  message: string;
+  files: string;
+}) {
+  const files = [];
+
+  // Check if 'root' is a file
+  if (await existsAndIsFile(props.files)) {
+    const txt = await Deno.readTextFile(props.files);
+    files.push({
+      filePath: props.files,
+      document: txt,
+      message: props.message,
+    });
+  } else {
+    const root = props.files || Deno.cwd();
+    for await (const file of walkTextFiles(root, gitignorePath)) {
+      const txt = await Deno.readTextFile(file.path);
+
+      files.push({
+        filePath: file.path,
+        document: txt,
+        message: props.message,
+      });
+    }
+  }
+
+  // Hard limit of 100 files, to avoid runaway scripts
+  if (files.length > 100) {
+    throw new Error("Too many files to check at once. Please check less files");
+  }
+
+  // Confirm if more than 5 files.
+  if (files.length > 5) {
+    const confirm = prompt(
+      `You are about to check ${files.length} files. Are you sure? (Y/n)`,
+      "n"
+    );
+    const confirmed = confirm == "Y" || confirm == "y";
+    if (!confirmed) {
+      console.log("Aborting.");
+      Deno.exit(1);
+    }
+  }
+
+  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
+
+  const now = Date.now();
+  const promises = [];
+  for (const file of files) {
+    promises.push(
+      checkAndLogMessageAgainstFileAndSnippet({
+        host: props.host,
+        message: file.message,
+        change: {
+          file: file.filePath,
+          snippet: file.document,
+        },
+        accessToken: props.accessToken,
+      })
+    );
+  }
+  const results = await Promise.all(promises);
+  const failed = results.filter((r) => !r);
+  if (failed.length > 0) {
+    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    Deno.exit(1);
+  }
+  console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+export async function checkRulesAgainstFiles(props: {
+  host: string;
+  accessToken: string;
+  files: string;
+}) {
+  const files = [];
+
+  for await (const rule of walkTextFiles(rulesDir, gitignorePath)) {
+    // Check if 'root' is a file
+    if (await existsAndIsFile(props.files)) {
+      const txt = await Deno.readTextFile(props.files);
+      files.push({
+        filePath: props.files,
+        document: txt,
+        rulePath: rule.path,
+      });
+    } else {
+      const root = props.files || Deno.cwd();
+      for await (const file of walkTextFiles(root, gitignorePath)) {
+        const txt = await Deno.readTextFile(file.path);
+
+        files.push({
+          filePath: file.path,
+          document: txt,
+          rulePath: rule.path,
+        });
+      }
+    }
+  }
+
+  // Hard limit of 100 files, to avoid runaway scripts
+  if (files.length > 100) {
+    throw new Error("Too many files to check at once. Please check less files");
+  }
+
+  // Confirm if more than 5 files.
+  if (files.length > 5) {
+    const confirm = prompt(
+      `You are about to check ${files.length} files. Are you sure? (Y/n)`,
+      "n"
+    );
+    const confirmed = confirm == "Y" || confirm == "y";
+    if (!confirmed) {
+      console.log("Aborting.");
+      Deno.exit(1);
+    }
+  }
+
+  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
+
+  const now = Date.now();
+  const promises = [];
+  for (const file of files) {
+    promises.push(
+      checkAndLogRuleFileAgainst({
+        host: props.host,
+        rulePath: file.rulePath,
+        change: {
+          file: file.filePath,
+          snippet: file.document,
+        },
         accessToken: props.accessToken,
       })
     );
@@ -231,6 +387,9 @@ export async function checkCmd(props: {
   secret?: string;
   diff?: string;
   message?: string;
+
+  // The root to check files against
+  files?: string;
 }) {
   const config = await readConfig();
   const accessToken = props.secret || config.accessToken;
@@ -246,6 +405,28 @@ ${colors.bold("Ends with:")}: ${accessToken.slice(-3)}
 ${colors.bold("Length:")}: ${accessToken.length}`
     );
     Deno.exit(1);
+  }
+
+  if (props.files && props.diff) {
+    console.log("Cannot use --files and --diff at the same time");
+    Deno.exit(1);
+  }
+
+  if (props.message && props.files) {
+    return checkMessageAgainstFiles({
+      host: props.host,
+      accessToken: accessToken,
+      message: props.message,
+      files: props.files,
+    });
+  }
+
+  if (!props.message && props.files) {
+    return checkRulesAgainstFiles({
+      host: props.host,
+      accessToken: accessToken,
+      files: props.files,
+    });
   }
 
   if (props.message) {
