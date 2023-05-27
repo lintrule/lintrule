@@ -66,7 +66,7 @@ async function checkAndLogRuleFileAgainstDiff(props: {
   }
 }
 
-async function checkAndLogMessageAgainstDiff(props: {
+async function checkAndLogMessageAgainstFileAndSnippet(props: {
   message: string;
   change: {
     file: string;
@@ -209,10 +209,73 @@ async function checkMessageAgainstDiff(props: {
   const promises = [];
   for (const file of files) {
     promises.push(
-      checkAndLogMessageAgainstDiff({
+      checkAndLogMessageAgainstFileAndSnippet({
         host: props.host,
         message: file.message,
         change: file.change,
+        accessToken: props.accessToken,
+      })
+    );
+  }
+  const results = await Promise.all(promises);
+  const failed = results.filter((r) => !r);
+  if (failed.length > 0) {
+    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    Deno.exit(1);
+  }
+  console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+async function checkMessageAgainstFiles(props: {
+  host: string;
+  accessToken: string;
+  diff?: string;
+  message: string;
+  root: string;
+}) {
+  const files = [];
+  const root = props.root || Deno.cwd();
+  for await (const file of walkTextFiles(root, gitignorePath)) {
+    const txt = await Deno.readTextFile(file.path);
+
+    files.push({
+      filePath: file.path,
+      document: txt,
+      message: props.message,
+    });
+  }
+
+  // Hard limit of 100 files, to avoid runaway scripts
+  if (files.length > 100) {
+    throw new Error("Too many files to check at once. Please check less files");
+  }
+
+  // Confirm if more than 5 files.
+  if (files.length > 5) {
+    const confirm = prompt(
+      `You are about to check ${files.length} files. Are you sure? (Y/n)`,
+      "n"
+    );
+    const confirmed = confirm == "Y" || confirm == "y";
+    if (!confirmed) {
+      console.log("Aborting.");
+      Deno.exit(1);
+    }
+  }
+
+  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
+
+  const now = Date.now();
+  const promises = [];
+  for (const file of files) {
+    promises.push(
+      checkAndLogMessageAgainstFileAndSnippet({
+        host: props.host,
+        message: file.message,
+        change: {
+          file: file.filePath,
+          snippet: file.document,
+        },
         accessToken: props.accessToken,
       })
     );
@@ -231,6 +294,9 @@ export async function checkCmd(props: {
   secret?: string;
   diff?: string;
   message?: string;
+
+  // The root to check files against
+  files?: string;
 }) {
   const config = await readConfig();
   const accessToken = props.secret || config.accessToken;
@@ -246,6 +312,20 @@ ${colors.bold("Ends with:")}: ${accessToken.slice(-3)}
 ${colors.bold("Length:")}: ${accessToken.length}`
     );
     Deno.exit(1);
+  }
+
+  if (props.files && props.diff) {
+    console.log("Cannot use --files and --diff at the same time");
+    Deno.exit(1);
+  }
+
+  if (props.message && props.files) {
+    return checkMessageAgainstFiles({
+      host: props.host,
+      accessToken: accessToken,
+      message: props.message,
+      root: props.files,
+    });
   }
 
   if (props.message) {
