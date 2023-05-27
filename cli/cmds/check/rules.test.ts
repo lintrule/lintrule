@@ -62,4 +62,35 @@ Deno.test("sendRule", async () => {
     object: "check_response",
     pass: true,
   });
+  server.close();
+});
+
+Deno.test("sendRule with context_too_big", async () => {
+  const server = checkServerWithResponse(
+    {
+      object: "error",
+      type: "context_too_big",
+    },
+    400
+  );
+  server.listen();
+
+  const res = await sendRule({
+    url: CHECK_URL,
+    accessToken: "token",
+    documentRule: {
+      document: "rly big i sweat",
+      rule: "big big big",
+    },
+    retries: 1,
+  });
+
+  assertEquals(res, {
+    object: "check_response",
+    pass: false,
+    skipped: {
+      reason: "context_too_big",
+    },
+  });
+  server.close();
 });
