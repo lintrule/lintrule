@@ -14,7 +14,7 @@ const root = rootDir || Deno.cwd();
 const rulesDir = `${root}/rules`;
 const gitignorePath = ".gitignore";
 
-async function checkRuleFileAgainstDiff(props: {
+async function checkAndLogRuleFileAgainstDiff(props: {
   rulePath: string;
   change: {
     file: string;
@@ -66,6 +66,62 @@ async function checkRuleFileAgainstDiff(props: {
   }
 }
 
+async function checkAndLogMessageAgainstDiff(props: {
+  message: string;
+  change: {
+    file: string;
+    snippet: string;
+  };
+  host: string;
+  accessToken: string;
+}) {
+  const now = Date.now();
+  const result = await check({
+    document: props.change.snippet,
+    rule: props.message,
+    host: props.host,
+    accessToken: props.accessToken,
+  });
+  const totalTime = Date.now() - now;
+
+  const relativeEntry = relative(root, props.change.file);
+
+  // Take only the first 20 characters of the message
+  let msg = props.message;
+  if (msg.length > 20) {
+    msg = msg.slice(0, 20) + "...";
+  }
+
+  if (result.skipped) {
+    console.log(
+      `  ${colors.bgYellow(" ⚠️ SKIP ")} ${relativeEntry} ${colors.dim(
+        "=>"
+      )} ${msg}\nThe diff is too big to check :( ${colors.dim(
+        `(${totalTime}ms)`
+      )}`
+    );
+    return true;
+  }
+
+  if (result.pass) {
+    console.log(
+      `  ${colors.bgBrightGreen(" ✔️ PASS ")} ${msg} ${colors.dim(
+        "=>"
+      )} ${relativeEntry} ${colors.dim(`(${totalTime}ms)`)}`
+    );
+    return true;
+  } else {
+    console.log(
+      `  ${colors.bgRed(
+        colors.brightWhite(" FAIL ")
+      )} ${relativeEntry} ${msg}\n${result.message} ${colors.dim(
+        `(${totalTime}ms)`
+      )}`
+    );
+    return false;
+  }
+}
+
 export async function checkRulesAgainstDiff(props: {
   host: string;
   accessToken: string;
@@ -110,7 +166,7 @@ export async function checkRulesAgainstDiff(props: {
   const promises = [];
   for (const file of files) {
     promises.push(
-      checkRuleFileAgainstDiff({
+      checkAndLogRuleFileAgainstDiff({
         host: props.host,
         rulePath: file.rulePath,
         change: file.change,
@@ -122,7 +178,49 @@ export async function checkRulesAgainstDiff(props: {
   const results = await Promise.all(promises);
   const failed = results.filter((r) => !r);
   if (failed.length > 0) {
-    console.log(colors.bgRed(`  ${failed.length} rules failed. `));
+    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    Deno.exit(1);
+  }
+  console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+async function checkMessageAgainstDiff(props: {
+  host: string;
+  accessToken: string;
+  diff?: string;
+  message: string;
+}) {
+  const files = [];
+  for await (const change of getChangesAsFiles(props.diff)) {
+    files.push({
+      change,
+      message: props.message,
+    });
+  }
+
+  // Add a little sanity check for runaway files atm
+  if (files.length > 100) {
+    throw new Error("Too many files to check at once. Please check less files");
+  }
+
+  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
+
+  const now = Date.now();
+  const promises = [];
+  for (const file of files) {
+    promises.push(
+      checkAndLogMessageAgainstDiff({
+        host: props.host,
+        message: file.message,
+        change: file.change,
+        accessToken: props.accessToken,
+      })
+    );
+  }
+  const results = await Promise.all(promises);
+  const failed = results.filter((r) => !r);
+  if (failed.length > 0) {
+    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
     Deno.exit(1);
   }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
@@ -151,7 +249,12 @@ ${colors.bold("Length:")}: ${accessToken.length}`
   }
 
   if (props.message) {
-    throw new Error("Not implemented yet");
+    return checkMessageAgainstDiff({
+      host: props.host,
+      accessToken: accessToken,
+      diff: props.diff,
+      message: props.message,
+    });
   }
 
   return checkRulesAgainstDiff({

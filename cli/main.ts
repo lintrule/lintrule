@@ -55,7 +55,7 @@ const cmd: any = new Command()
   .command("upgrade", "Upgrade lintrule to the latest version")
   .action(() => upgrade())
   .command("check", "Check this repository against all rules")
-  .option("-m [message]", "A one-off rule to check.")
+  .option("--m [message]", "A one-off rule to check.")
   .option("--host [host]", "A specific api deployment of lintrule")
   .option(
     "--secret [secret]",
@@ -65,14 +65,14 @@ const cmd: any = new Command()
     "--diff [diff]",
     "Run rules only on changes between two files. Ex: 'HEAD^' or 'main..feature'"
   )
-  .action((options, ..._args) =>
-    checkCmd({
+  .action((options, ..._args) => {
+    return checkCmd({
       host: options.host?.toString() || "https://lintrule.com",
       secret: options.secret?.toString(),
       diff: options.diff?.toString(),
       message: options.m?.toString(),
-    })
-  )
+    });
+  })
   .command("login", "Login to lintrule")
   .option("--host [host]", "A specific api deployment of lintrule")
   .action((options, ..._args) => {
