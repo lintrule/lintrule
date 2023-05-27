@@ -97,22 +97,16 @@ export async function sendRule({
 }
 
 export async function check({
-  change,
+  document,
   host,
-  rulePath,
+  rule,
   accessToken,
 }: {
   host: string;
-  change: {
-    file: string;
-    snippet: string;
-  };
-  rulePath: string;
+  document: string;
+  rule: string;
   accessToken: string;
 }): Promise<DocumentRuleResponse> {
-  // Read the rule
-  let rule = await Deno.readTextFile(rulePath);
-
   // Remove the frontmatter in the rule
   rule = rule.replace(/---[\s\S]*---/, "");
 
@@ -120,7 +114,7 @@ export async function check({
     url: `${host}/api/check`,
     accessToken,
     documentRule: {
-      document: change.snippet,
+      document: document,
       rule: rule.trim(),
     },
     retries: 2,

@@ -14,7 +14,7 @@ const root = rootDir || Deno.cwd();
 const rulesDir = `${root}/rules`;
 const gitignorePath = ".gitignore";
 
-async function checkRuleAgainstEntry(props: {
+async function checkRuleFileAgainstDiff(props: {
   rulePath: string;
   change: {
     file: string;
@@ -24,9 +24,10 @@ async function checkRuleAgainstEntry(props: {
   accessToken: string;
 }) {
   const now = Date.now();
+  const rule = await Deno.readTextFile(props.rulePath);
   const result = await check({
-    change: props.change,
-    rulePath: props.rulePath,
+    document: props.change.snippet,
+    rule: rule,
     host: props.host,
     accessToken: props.accessToken,
   });
@@ -109,7 +110,7 @@ export async function checkRulesAgainstDiff(props: {
   const promises = [];
   for (const file of files) {
     promises.push(
-      checkRuleAgainstEntry({
+      checkRuleFileAgainstDiff({
         host: props.host,
         rulePath: file.rulePath,
         change: file.change,
