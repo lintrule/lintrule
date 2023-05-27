@@ -247,7 +247,7 @@ async function checkMessageAgainstFiles(props: {
   if (await existsAndIsFile(props.files)) {
     const txt = await Deno.readTextFile(props.files);
     files.push({
-      filePath: root,
+      filePath: props.files,
       document: txt,
       message: props.message,
     });
@@ -320,7 +320,7 @@ export async function checkRulesAgainstFiles(props: {
     if (await existsAndIsFile(props.files)) {
       const txt = await Deno.readTextFile(props.files);
       files.push({
-        filePath: root,
+        filePath: props.files,
         document: txt,
         rulePath: rule.path,
       });
