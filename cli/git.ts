@@ -78,11 +78,11 @@ export async function getDiffInGithubActionPullRequest() {
   await gitFetch(ref);
 
   const p = new Deno.Command("git", {
-    args: ["diff", `${head}..${ref}^`],
+    args: ["diff", `${ref}..${head}`],
     stdout: "piped",
   });
 
-  console.log(colors.dim(`\n$ git diff ${head}..${ref}`));
+  console.log(colors.dim(`\n$ git diff ${ref}..${head}`));
 
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
@@ -132,11 +132,11 @@ export async function getDiffInGithubAction() {
   await gitFetch(ref);
 
   const p = new Deno.Command("git", {
-    args: ["diff", `${head}..${ref}^`],
+    args: ["diff", `${ref}..${head}`],
     stdout: "piped",
   });
 
-  console.log(colors.dim(`\n$ git diff ${head}..${ref}`));
+  console.log(colors.dim(`\n$ git diff ${ref}..${head}`));
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
   if (code !== 0) {
