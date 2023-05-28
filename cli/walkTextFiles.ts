@@ -6,11 +6,26 @@ import {
 import ignore from "./ignore.js";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import * as colors from "https://deno.land/std/fmt/colors.ts";
+import { countLines } from "./loc.ts";
 
 async function isTooBig(filePath: string, kbs: number): Promise<boolean> {
   const data = await Deno.readFile(filePath);
 
   return data.length > 1024 * kbs;
+}
+
+async function isBeyondMaxLines(
+  filePath: string,
+  maxLines: number
+): Promise<boolean> {
+  try {
+    const data = await Deno.readTextFile(filePath);
+
+    const lines = await countLines(data);
+    return lines > maxLines;
+  } catch (e) {
+    return true;
+  }
 }
 
 export const ignoredPatterns = [
@@ -52,6 +67,24 @@ export const ignoredPatterns = [
   "*.pptx", // ignore pptx
   "*.pyc", // ignore pycs
   "*.ipynb", // ignore ipynbs
+  "*.whl", // ignore whls
+  "*.o", // ignore os
+  "*.a", // ignore as
+  "*.so", // ignore sos
+  "*.dylib", // ignore dylibs
+  "*.exe", // ignore exes
+  "*.dll", // ignore dlls
+  "*.dmg", // ignore dmgs
+  "*.iso", // ignore isos
+  "*.bin", // ignore bins
+  "*.csv", // ignore csvs
+  "*.tsv", // ignore tsvs
+  "*.dat", // ignore dats
+  "*.db", // ignore dbs
+  "*.sqlite", // ignore sqlites
+  "*.dbf", // ignore dbfs
+  "*.mdb", // ignore mdbs
+  "*.ico", // ignore icos
 ];
 
 export async function* walkTextFiles(
@@ -86,6 +119,13 @@ export async function* walkTextFiles(
     if (await isTooBig(entry.path, 100)) {
       console.warn(
         colors.red(`Skipping file because it is too big: ${entry.path}`)
+      );
+      continue;
+    }
+
+    if (await isBeyondMaxLines(entry.path, 5000)) {
+      console.warn(
+        colors.red(`Skipping file because it is too long: ${entry.path}`)
       );
       continue;
     }
