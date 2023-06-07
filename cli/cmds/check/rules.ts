@@ -8,7 +8,7 @@ export interface DocumentRuleResponse {
   object: "check_response";
   pass: boolean;
   skipped?: {
-    reason: "context_too_big";
+    reason: "context_too_big" | "rate_limit";
   };
   message?: string;
 }
@@ -53,6 +53,16 @@ export async function sendRule({
     throw new Error(
       "Please setup your billing details! Please run `rules login` to setup your billing details."
     );
+  }
+
+  if (res.status === 429) {
+    return {
+      object: "check_response",
+      pass: false,
+      skipped: {
+        reason: "rate_limit",
+      },
+    };
   }
 
   // Check for 'context_too_big'

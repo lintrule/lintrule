@@ -29,7 +29,7 @@ export async function estimateBillingCommand() {
       };
     });
 
-  const contextBufferSize = 50;
+  const contextBufferSize = 20;
   const linesOfCode = changes.reduce((acc, change) => {
     if (!change.additions) {
       return acc;
@@ -39,6 +39,8 @@ export async function estimateBillingCommand() {
   }, 0);
 
   console.log(
-    `Lintrule would cost $${linesOfCode / 1000} in the last month per rule`
+    `Lintrule would cost $${
+      linesOfCode / 1000
+    } in the last month per set of rules.`
   );
 }

@@ -41,10 +41,18 @@ async function checkAndLogRuleFileAgainst(props: {
     console.log(
       `  ${colors.bgYellow(" ⚠️ SKIP ")} ${relativeEntry} ${colors.dim(
         "=>"
-      )} ${relativeRuleEntry}\nThe diff is too big to check :( ${colors.dim(
-        `(${totalTime}ms)`
-      )}`
+      )} ${relativeRuleEntry} ${colors.dim(`(${totalTime}ms)`)}`
     );
+    if (result.skipped.reason === "context_too_big") {
+      console.log(`${colors.dim("\n  The diff is too big to check :(")}`);
+    }
+    if (result.skipped.reason === "rate_limit") {
+      console.log(
+        `${colors.dim(
+          "\n  You're doing that too much and hitting rate limits."
+        )}`
+      );
+    }
     return true;
   }
 
@@ -97,10 +105,18 @@ async function checkAndLogMessageAgainstFileAndSnippet(props: {
     console.log(
       `  ${colors.bgYellow(" ⚠️ SKIP ")} ${relativeEntry} ${colors.dim(
         "=>"
-      )} ${msg}\nThe diff is too big to check :( ${colors.dim(
-        `(${totalTime}ms)`
-      )}`
+      )} ${relativeEntry} ${colors.dim(`(${totalTime}ms)`)}`
     );
+    if (result.skipped.reason === "context_too_big") {
+      console.log(`${colors.dim("\n  The diff is too big to check :(")}`);
+    }
+    if (result.skipped.reason === "rate_limit") {
+      console.log(
+        `${colors.dim(
+          "\n  You're doing that too much and hitting rate limits."
+        )}`
+      );
+    }
     return true;
   }
 
