@@ -86,7 +86,8 @@ export async function estimateBillingCommand() {
   );
   const table = new Table(
     [colors.dim("  $ per contributor"), `$${costPerContributor.toFixed(2)}`],
-    [colors.dim("  $ total cost"), `$${totalCostPerRule.toFixed(2)}`]
+    [colors.dim("  $ total cost"), `$${totalCostPerRule.toFixed(2)}`],
+    [colors.dim("  num contributors"), `${numContributors}`]
   );
 
   console.log(table.toString());
