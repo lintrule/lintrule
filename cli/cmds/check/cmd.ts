@@ -423,6 +423,16 @@ ${colors.bold("Length:")}: ${accessToken.length}`
     Deno.exit(1);
   }
 
+  // Check if there's a .gitignore
+  const gitignore = await exists(gitignorePath);
+
+  if (!gitignore && !props.files) {
+    console.log(
+      `No .gitignore found. \`rules check\` is meant to be run in a git repository.\nIf you want to check a specific file, use \`rules check --files <path>\``
+    );
+    Deno.exit(1);
+  }
+
   if (props.files && props.diff) {
     console.log("Cannot use --files and --diff at the same time");
     Deno.exit(1);
