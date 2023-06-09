@@ -177,6 +177,25 @@ export async function checkRulesAgainstDiff(props: {
     throw new Error("Too many files to check at once. Please check less files");
   }
 
+  // If there's no files found, explain to the user about diffs
+  if (files.length === 0) {
+    console.log(`No changes found.
+
+Lintrule runs on diffs by default and skips large files 
+or things in your .gitignore. You can run Lintrule against 
+more changes with --diff. 
+
+For example:
+  
+  # Changes since since two commits ago 
+  rules check --diff HEAD^^
+
+  # Changes between a branch
+  rules check --diff main..feature
+`);
+    Deno.exit(0);
+  }
+
   console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
 
   const now = Date.now();
@@ -372,7 +391,7 @@ export async function checkRulesAgainstFiles(props: {
     }
   }
 
-  console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
+  console.log(colors.dim(`\nFound ${files.length} files...\n`));
 
   const now = Date.now();
   const promises = [];
