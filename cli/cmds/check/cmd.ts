@@ -186,10 +186,10 @@ export async function checkRulesAgainstDiff(props: {
       frontmatter.parse(file) as any;
 
     for await (const change of getChangesAsFiles(props.diff)) {
-      // // Don't include rules in rules
-      // if (allRuleEntries.map((r) => r.path).includes(change.file)) {
-      //   continue;
-      // }
+      // Don't include rules in rules
+      if (allRuleEntries.map((r) => r.path).includes(change.file)) {
+        continue;
+      }
 
       if (result.data?.include) {
         const include = result.data.include;
