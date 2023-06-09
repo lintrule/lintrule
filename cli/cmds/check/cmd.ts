@@ -12,7 +12,9 @@ import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
 const rootDir = await findRoot();
 
 const root = rootDir || Deno.cwd();
-const rulesDir = `${root}/rules`;
+
+const plainRulesDir = `${root}/rules`;
+const dotRulesDir = `${root}/.rules`;
 const gitignorePath = ".gitignore";
 
 async function checkAndLogRuleFileAgainst(props: {
@@ -139,6 +141,34 @@ async function checkAndLogMessageAgainstFileAndSnippet(props: {
   }
 }
 
+async function getRulesDir() {
+  // If the `.rules` dir exists, use that
+  if (await exists(dotRulesDir)) {
+    return dotRulesDir;
+  }
+
+  // If the `.rules` dir doesn't exist, but the `rules` dir does, use that
+  if (await exists(plainRulesDir)) {
+    return plainRulesDir;
+  }
+
+  // If neither exists, tell the user to run `rules init`
+  console.log(
+    `No .rules folder found. Please run ${colors.bold(
+      "`rules init`"
+    )} to create a .rules folder.`
+  );
+  Deno.exit(1);
+}
+
+async function toArray<T>(gen: AsyncIterable<T>): Promise<T[]> {
+  const out: T[] = [];
+  for await (const x of gen) {
+    out.push(x);
+  }
+  return out;
+}
+
 export async function checkRulesAgainstDiff(props: {
   host: string;
   accessToken: string;
@@ -147,12 +177,20 @@ export async function checkRulesAgainstDiff(props: {
   const accessToken = props.accessToken;
 
   const files = [];
-  for await (const ruleEntry of walkTextFiles(rulesDir, gitignorePath)) {
+  const rulesDir = await getRulesDir();
+  const allRuleEntries = await toArray(walkTextFiles(rulesDir, gitignorePath));
+
+  for (const ruleEntry of allRuleEntries) {
     const file = await Deno.readTextFile(ruleEntry.path);
     const result: { data?: { include?: string[] }; content: string } =
       frontmatter.parse(file) as any;
 
     for await (const change of getChangesAsFiles(props.diff)) {
+      // // Don't include rules in rules
+      // if (allRuleEntries.map((r) => r.path).includes(change.file)) {
+      //   continue;
+      // }
+
       if (result.data?.include) {
         const include = result.data.include;
         if (!Array.isArray(include)) {
@@ -350,6 +388,7 @@ export async function checkRulesAgainstFiles(props: {
 }) {
   const files = [];
 
+  const rulesDir = await getRulesDir();
   for await (const rule of walkTextFiles(rulesDir, gitignorePath)) {
     // Check if 'root' is a file
     if (await existsAndIsFile(props.files)) {

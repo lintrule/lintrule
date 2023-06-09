@@ -5,14 +5,14 @@ import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
 export async function initCmd() {
   // If there's not already a rules directory
   // add one
-  await Deno.mkdir("rules", { recursive: true });
+  await Deno.mkdir(".rules", { recursive: true });
 
   // If the 'no-bugs' rule eixsts
   // don't overwrite it
-  if (!(await exists(join("rules", "no-bugs.md")))) {
+  if (!(await exists(join(".rules", "no-bugs.md")))) {
     // Add a markdown file called "no-bugs.md"
     await Deno.writeTextFile(
-      join("rules", "no-bugs.md"),
+      join(".rules", "no-bugs.md"),
       "don't approve obvious bugs."
     );
   }
