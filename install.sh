@@ -21,7 +21,6 @@ fi
 command -v unzip >/dev/null ||
     error 'unzip is required to install lintrule'
 
-
 # Make sure the target dir exists
 mkdir -p "${TARGET_DIR}"
 
@@ -40,14 +39,8 @@ case $(uname -ms) in
     ;;
 esac
 
-if [[ $target = darwin-x64 ]]; then
-    # Is this process running in Rosetta?
-    # redirect stderr to devnull to avoid error message when not running in Rosetta
-    if [[ $(sysctl -n sysctl.proc_translated 2>/dev/null) = 1 ]]; then
-        target=darwin-aarch64
-        info "Your shell is running in Rosetta 2. Downloading rules for $target instead"
-    fi
-fi
+# Set up temporary directory for download and extraction
+TMPDIR=$(mktemp -d)
 
 GITHUB=${GITHUB-"https://github.com"}
 
@@ -68,26 +61,21 @@ fi
 
 # Download the 'rules' CLI binary from the specified URL.
 echo "Downloading '${BINARY_NAME}' CLI binary..."
-echo "curl -L -o \"${TARGET_FILE}.zip\" \"${RULES_BINARY_URL}\""
-curl -L -o "${TARGET_FILE}.zip" "${RULES_BINARY_URL}"
+curl -L -o "${TMPDIR}/${BINARY_NAME}.zip" "${RULES_BINARY_URL}"
 
-echo "unzip -o \"${TARGET_FILE}.zip\" -d \"${TARGET_DIR}/dist\""
-unzip -o "$TARGET_FILE.zip" -d "$TARGET_DIR/dist" ||
+# Extract the zip file in the temporary directory.
+echo "unzip -o \"${TMPDIR}/${BINARY_NAME}.zip\" -d \"${TMPDIR}/dist\""
+unzip -o "${TMPDIR}/${BINARY_NAME}.zip" -d "${TMPDIR}/dist" ||
     error 'Failed to extract rules'
 
-# rename the binary to 'rules'
-mv "$TARGET_DIR/dist/rules-$target" "$TARGET_DIR/$BINARY_NAME"
-
+# Move the binary to the target directory.
+mv "${TMPDIR}/dist/rules-$target" "${TARGET_DIR}/${BINARY_NAME}"
 
 # Make the downloaded binary executable.
 chmod +x "${TARGET_FILE}"
 
-# remove the dist directory
-rm -rf "$TARGET_DIR/dist"
-
-# remove the downloaded zip file
-rm "$TARGET_FILE.zip"
-
+# Clean up the temporary directory.
+rm -rf "${TMPDIR}"
 
 # Verify that the 'rules' CLI binary is successfully installed.
 if [ -f "${TARGET_FILE}" ]; then
