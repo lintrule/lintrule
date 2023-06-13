@@ -30,13 +30,25 @@ export async function initCmd() {
 
   if (!accessToken) {
     // Print out an instruction to login
-    console.log(`You're ready to go! Try running:
+    console.log(`You're ready to go! 
+
+Try running:
   rules login
-  rules check`);
+  rules check
+
+Learn how to write great rules at 
+https://lintrule.com/docs/in-production/best-practices
+`);
     return;
   }
 
   // Print out an instruction to login and then run rules check
-  console.log(`You're ready to go! Try running:
-  rules check`);
+  console.log(`You're ready to go! 
+
+Try running:
+  rules check
+
+Learn how to write great rules at 
+https://lintrule.com/docs/in-production/best-practices
+`);
 }
