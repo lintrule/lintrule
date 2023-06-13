@@ -37,23 +37,31 @@ type Responses =
   | ChallengeUnauthorizedResponse;
 
 async function openBrowser(url: string) {
-  let cmd: string[] = [];
-  switch (Deno.build.os) {
-    case "windows":
-      cmd = ["cmd", "/c", "start", url];
-      break;
-    case "darwin":
-      cmd = ["open", url];
-      break;
-    case "linux":
-      cmd = ["xdg-open", url];
-      break;
-    default:
-      return;
+  try {
+    let cmd: string[] = [];
+    switch (Deno.build.os) {
+      case "windows":
+        cmd = ["cmd", "/c", "start", url];
+        break;
+      case "darwin":
+        cmd = ["open", url];
+        break;
+      case "linux":
+        cmd = ["xdg-open", url];
+        break;
+      default:
+        return;
+    }
+    const process = Deno.run({ cmd });
+    await process.status();
+    process.close();
+  } catch (err) {
+    console.error(
+      colors.red(
+        `\n  Failed to open ${url} automatically, please copy paste it into a browser!\n`
+      )
+    );
   }
-  const process = Deno.run({ cmd });
-  await process.status();
-  process.close();
 }
 
 async function completeChallenge(props: { host: string; challenge: string }) {
