@@ -266,7 +266,7 @@ async function checkMessageAgainstDiff(props: {
   message: string;
 }) {
   const files = [];
-  for await (const change of getChangesAsFiles(props.diff)) {
+  for await (const change of getChangesAsHunks(props.diff)) {
     files.push({
       change,
       message: props.message,
