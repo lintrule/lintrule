@@ -169,7 +169,7 @@ export async function* getChangesAsFiles(diff?: string) {
         snippet: text,
       };
     } catch (err) {
-      console.error(colors.dim(`Failed to read: ${file.newPath}`));
+      console.error(colors.dim(`Missing file: ${file.newPath}`));
       continue;
     }
   }
