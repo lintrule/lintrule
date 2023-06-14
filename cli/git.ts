@@ -214,14 +214,20 @@ export async function* getChangesAsFiles(diff?: string) {
   const files = parseDiffToFiles(text);
 
   for (const file of files) {
-    // Read the file
-    const p = await Deno.readFile(file.file);
-    const text = new TextDecoder().decode(p);
+    try {
+      // Read the file
+      const p = await Deno.readFile(file.file);
+      const text = new TextDecoder().decode(p);
 
-    yield {
-      file: file.file,
-      snippet: text,
-    };
+      yield {
+        file: file.file,
+        snippet: text,
+      };
+    } catch (err) {
+      console.log(file.diff);
+      console.error(colors.red(`Could not find file: ${file.file}`));
+      continue;
+    }
   }
 }
 
