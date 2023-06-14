@@ -5,6 +5,19 @@ export function parseDiffToFiles(diff: string) {
   return gitdiff.parse(diff);
 }
 
+// Splits one big git diffs into just the diffs for each file
+export function splitDiffs(diff: string) {
+  const files = parseDiffToFiles(diff);
+
+  const diffs: string[] = [];
+
+  for (const file of files) {
+    diffs.push(file.hunks.map((h) => h.content).join("\n"));
+  }
+
+  return diffs;
+}
+
 export async function getDiffInGithubActionPullRequest() {
   const head = Deno.env.get("GITHUB_HEAD_REF");
   if (!head) {
@@ -167,6 +180,45 @@ export async function* getChangesAsFiles(diff?: string) {
       yield {
         file: file.newPath,
         snippet: text,
+      };
+    } catch (err) {
+      console.error(colors.dim(`Missing file: ${file.newPath}`));
+      continue;
+    }
+  }
+}
+
+export async function* getChangesAsHunks(diff?: string) {
+  const text = await getDiff(diff);
+  const files = parseDiffToFiles(text);
+
+  for (const file of files) {
+    try {
+      if (file.type === "delete") {
+        continue;
+      }
+
+      let snippet = "";
+      for (const hunk of file.hunks) {
+        snippet += hunk.content + "\n";
+        for (const change of hunk.changes) {
+          if (change.type === "delete") {
+            snippet += `-${change.content}\n`;
+          }
+
+          if (change.type === "insert") {
+            snippet += `+${change.content}\n`;
+          }
+
+          if (change.type === "normal") {
+            snippet += change.content + "\n";
+          }
+        }
+      }
+
+      yield {
+        file: file.newPath,
+        snippet: snippet,
       };
     } catch (err) {
       console.error(colors.dim(`Missing file: ${file.newPath}`));
