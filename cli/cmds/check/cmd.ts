@@ -4,7 +4,7 @@ import { walkTextFiles } from "../../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../../config.ts";
-import { getChangesAsFiles } from "../../git.ts";
+import { getChangesAsFiles, getChangesAsHunks } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
@@ -185,7 +185,7 @@ export async function checkRulesAgainstDiff(props: {
     const result: { data?: { include?: string[] }; content: string } =
       frontmatter.parse(file) as any;
 
-    for await (const change of getChangesAsFiles(props.diff)) {
+    for await (const change of getChangesAsHunks(props.diff)) {
       // Don't include rules in rules
       if (allRuleEntries.map((r) => r.path).includes(change.file)) {
         continue;
@@ -217,7 +217,8 @@ export async function checkRulesAgainstDiff(props: {
 
   // If there's no files found, explain to the user about diffs
   if (files.length === 0) {
-    console.log(`No changes found.
+    console.log(`
+No changes found.
 
 Lintrule runs on diffs by default and skips large files 
 or things in your .gitignore. You can run Lintrule against 
@@ -265,7 +266,7 @@ async function checkMessageAgainstDiff(props: {
   message: string;
 }) {
   const files = [];
-  for await (const change of getChangesAsFiles(props.diff)) {
+  for await (const change of getChangesAsHunks(props.diff)) {
     files.push({
       change,
       message: props.message,
