@@ -217,7 +217,8 @@ export async function checkRulesAgainstDiff(props: {
 
   // If there's no files found, explain to the user about diffs
   if (files.length === 0) {
-    console.log(`No changes found.
+    console.log(`
+No changes found.
 
 Lintrule runs on diffs by default and skips large files 
 or things in your .gitignore. You can run Lintrule against 

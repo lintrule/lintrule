@@ -1,4 +1,4 @@
-import ignore from "../ignore.js";
+import ignore from "../vendor/ignore/ignore.js";
 import { ignoredPatterns } from "../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { Table } from "https://deno.land/x/cliffy@v0.24.2/table/table.ts";

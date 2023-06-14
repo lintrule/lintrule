@@ -3,7 +3,7 @@ import {
   WalkEntry,
   WalkOptions,
 } from "https://deno.land/std@0.115.0/fs/mod.ts";
-import ignore from "./ignore.js";
+import ignore from "./vendor/ignore/ignore.js";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import * as colors from "https://deno.land/std/fmt/colors.ts";
 import { countLines } from "./loc.ts";

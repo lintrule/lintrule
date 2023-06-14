@@ -12,8 +12,10 @@ try {
   const gh = Deno.run({
     cmd: ["gh", "--version"],
     stdout: "null",
+
     stderr: "null",
   });
+  //
   await gh.status();
 } catch (error) {
   logAndError("Please install the 'gh' command first: brew install gh");
