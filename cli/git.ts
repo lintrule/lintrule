@@ -86,11 +86,11 @@ export async function getDiffInGithubAction() {
   await gitFetch(ref);
 
   const p = new Deno.Command("git", {
-    args: ["diff", `${ref}..${head}`],
+    args: ["diff", `${ref}...${head}`],
     stdout: "piped",
   });
 
-  console.log(colors.dim(`\n$ git diff ${ref}..${head}`));
+  console.log(colors.dim(`\n$ git diff ${ref}...${head}`));
   const { code, stdout, stderr } = await p.output(); // "p.output()" returns a promise that resolves with the raw output
 
   if (code !== 0) {
@@ -194,10 +194,6 @@ export async function* getChangesAsHunks(diff?: string) {
 
   for (const file of files) {
     try {
-      if (file.type === "delete") {
-        continue;
-      }
-
       let snippet = "";
       for (const hunk of file.hunks) {
         snippet += hunk.content + "\n";

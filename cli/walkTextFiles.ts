@@ -123,7 +123,7 @@ export async function* walkTextFiles(
       continue;
     }
 
-    if (await isBeyondMaxLines(entry.path, 5000)) {
+    if (await isBeyondMaxLines(entry.path, 10000)) {
       console.warn(
         colors.red(`Skipping file because it is too long: ${entry.path}`)
       );

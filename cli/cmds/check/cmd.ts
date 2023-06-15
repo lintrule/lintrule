@@ -4,7 +4,7 @@ import { walkTextFiles } from "../../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../../config.ts";
-import { Change, getChangesAsFiles, getChangesAsHunks } from "../../git.ts";
+import { Change, getChangesAsHunks } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
@@ -66,13 +66,13 @@ async function checkAndLogRuleFileAgainst(props: {
     );
     return true;
   } else {
-    console.log(
-      `  ${colors.bgRed(
-        colors.brightWhite(" FAIL ")
-      )} ${relativeEntry} ${relativeRuleEntry}\n${result.message} ${colors.dim(
-        `(${totalTime}ms)`
-      )}`
-    );
+    const tag = colors.bgRed(colors.brightWhite(" x FAIL "));
+
+    const header = `  ${tag} ${relativeRuleEntry} ${colors.dim(
+      "=>"
+    )} ${relativeEntry} ${colors.dim(`(${totalTime}ms)`)}`;
+
+    console.log(`${header}\n  \n${result.message}\n`);
     return false;
   }
 }
@@ -132,7 +132,7 @@ async function checkAndLogMessageAgainstFileAndSnippet(props: {
   } else {
     console.log(
       `  ${colors.bgRed(
-        colors.brightWhite(" FAIL ")
+        colors.brightWhite(" x FAIL ")
       )} ${relativeEntry} ${msg}\n${result.message} ${colors.dim(
         `(${totalTime}ms)`
       )}`
@@ -220,21 +220,7 @@ export async function checkRulesAgainstDiff(props: {
 
   // If there's no files found, explain to the user about diffs
   if (files.length === 0) {
-    console.log(`
-No changes found.
-
-Lintrule runs on diffs by default and skips large files 
-or things in your .gitignore. You can run Lintrule against 
-more changes with --diff. 
-
-For example:
-  
-  # Changes since since two commits ago 
-  rules check --diff HEAD^^
-
-  # Changes between a branch
-  rules check --diff main..feature
-`);
+    printNoChangesFound();
     Deno.exit(0);
   }
 
@@ -256,10 +242,28 @@ For example:
   const results = await Promise.all(promises);
   const failed = results.filter((r) => !r);
   if (failed.length > 0) {
-    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    console.log(`\n${colors.bgRed(` ${failed.length} rules failed. `)}\n`);
     Deno.exit(1);
   }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
+}
+
+function printNoChangesFound() {
+  console.log(`
+No changes found.
+
+Lintrule runs on diffs by default and skips large files 
+or things in your .gitignore. You can run Lintrule against 
+more changes with --diff. 
+
+For example:
+  
+  # Changes since since two commits ago 
+  rules check --diff HEAD^^
+
+  # Changes between a branch
+  rules check --diff main..feature
+`);
 }
 
 async function checkMessageAgainstDiff(props: {
@@ -281,6 +285,11 @@ async function checkMessageAgainstDiff(props: {
     throw new Error("Too many files to check at once. Please check less files");
   }
 
+  if (files.length === 0) {
+    printNoChangesFound();
+    Deno.exit(0);
+  }
+
   console.log(colors.dim(`\nFound ${files.length} changed files...\n`));
 
   const now = Date.now();
@@ -298,7 +307,7 @@ async function checkMessageAgainstDiff(props: {
   const results = await Promise.all(promises);
   const failed = results.filter((r) => !r);
   if (failed.length > 0) {
-    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    console.log(`\n${colors.bgRed(` ${failed.length} rules failed. `)}\n`);
     Deno.exit(1);
   }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
@@ -379,7 +388,7 @@ async function checkMessageAgainstFiles(props: {
   const results = await Promise.all(promises);
   const failed = results.filter((r) => !r);
   if (failed.length > 0) {
-    console.log(colors.bgRed(`\n ${failed.length} rules failed. `), "\n");
+    console.log(`\n${colors.bgRed(` ${failed.length} rules failed. `)}\n`);
     Deno.exit(1);
   }
   console.log(colors.dim(`\nFinished. (${Date.now() - now}ms)\n`));
