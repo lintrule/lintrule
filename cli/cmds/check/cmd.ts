@@ -4,7 +4,7 @@ import { walkTextFiles } from "../../walkTextFiles.ts";
 import * as colors from "https://deno.land/std@0.185.0/fmt/colors.ts";
 import { relative } from "https://deno.land/std@0.185.0/path/mod.ts";
 import { readConfig } from "../../config.ts";
-import { getChangesAsFiles, getChangesAsHunks } from "../../git.ts";
+import { Change, getChangesAsFiles, getChangesAsHunks } from "../../git.ts";
 import * as frontmatter from "https://deno.land/x/frontmatter@v0.1.5/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.36.0/path/glob.ts";
 import { exists } from "https://deno.land/std@0.97.0/fs/mod.ts";
@@ -176,7 +176,10 @@ export async function checkRulesAgainstDiff(props: {
 }) {
   const accessToken = props.accessToken;
 
-  const files = [];
+  const files: Array<{
+    change: Change;
+    rulePath: string;
+  }> = [];
   const rulesDir = await getRulesDir();
   const allRuleEntries = await toArray(walkTextFiles(rulesDir, gitignorePath));
 
@@ -211,7 +214,7 @@ export async function checkRulesAgainstDiff(props: {
   }
 
   // Add a little sanity check for runaway files atm
-  if (files.length > 100) {
+  if (files.length > 1000) {
     throw new Error("Too many files to check at once. Please check less files");
   }
 
@@ -274,7 +277,7 @@ async function checkMessageAgainstDiff(props: {
   }
 
   // Add a little sanity check for runaway files atm
-  if (files.length > 100) {
+  if (files.length > 1000) {
     throw new Error("Too many files to check at once. Please check less files");
   }
 
@@ -339,7 +342,7 @@ async function checkMessageAgainstFiles(props: {
   }
 
   // Hard limit of 100 files, to avoid runaway scripts
-  if (files.length > 100) {
+  if (files.length > 1000) {
     throw new Error("Too many files to check at once. Please check less files");
   }
 
@@ -414,7 +417,7 @@ export async function checkRulesAgainstFiles(props: {
   }
 
   // Hard limit of 100 files, to avoid runaway scripts
-  if (files.length > 100) {
+  if (files.length > 1000) {
     throw new Error("Too many files to check at once. Please check less files");
   }
 

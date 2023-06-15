@@ -180,7 +180,7 @@ export async function* getChangesAsFiles(diff?: string) {
       yield {
         file: file.newPath,
         snippet: text,
-      };
+      } as Change;
     } catch (err) {
       console.error(colors.dim(`Missing file: ${file.newPath}`));
       continue;
@@ -219,10 +219,15 @@ export async function* getChangesAsHunks(diff?: string) {
       yield {
         file: file.newPath,
         snippet: snippet,
-      };
+      } as Change;
     } catch (err) {
       console.error(colors.dim(`Missing file: ${file.newPath}`));
       continue;
     }
   }
+}
+
+export interface Change {
+  file: string;
+  snippet: string;
 }
